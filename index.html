@@ -92,7 +92,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Loading Spinner */
+        /* Loading Spinner (processing overlay) */
         .spinner {
             border: 3px solid rgba(255,255,255,0.1);
             border-top-color: #10b981;
@@ -102,6 +102,37 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Navigation Overlay — dual counter-rotating rings */
+        .nav-ring-outer {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2.5px solid rgba(16,185,129,0.12);
+            border-top-color: #10b981;
+            border-right-color: rgba(16,185,129,0.45);
+            animation: spin 1.3s cubic-bezier(0.4,0,0.6,1) infinite;
+        }
+        .nav-ring-inner {
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(52,211,153,0.08);
+            border-bottom-color: #34d399;
+            border-left-color: rgba(52,211,153,0.35);
+            animation: spin 0.85s cubic-bezier(0.4,0,0.6,1) infinite reverse;
+        }
+        @keyframes navIconPulse {
+            0%,100% { opacity: .65; transform: scale(1); }
+            50%      { opacity: 1;   transform: scale(1.12); }
+        }
+        .nav-icon-pulse { animation: navIconPulse 1.6s ease-in-out infinite; }
+
+        @keyframes navFadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .nav-fadein { animation: navFadeIn 0.25s ease-out forwards; }
     </style>
 </head>
 <body class="antialiased selection:bg-brand-500 selection:text-white flex justify-center items-start min-h-[100dvh] overflow-x-hidden">
@@ -112,6 +143,27 @@
     <div id="loadingOverlay" class="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md hidden flex-col items-center justify-center">
         <div class="spinner mb-4"></div>
         <div id="loadingText" class="text-slate-300 font-medium tracking-wide">Processing...</div>
+    </div>
+
+    <!-- NAVIGATION LOADING OVERLAY -->
+    <div id="navOverlay" class="fixed inset-0 z-[99998] bg-slate-950/95 backdrop-blur-xl hidden flex-col items-center justify-center">
+        <div class="nav-fadein flex flex-col items-center">
+            <!-- Dual counter-rotating spinner -->
+            <div class="relative w-16 h-16 mb-7">
+                <div class="nav-ring-outer"></div>
+                <div class="nav-ring-inner"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="ph-fill ph-trend-up text-brand-400 text-[22px] nav-icon-pulse"></i>
+                </div>
+            </div>
+            <!-- Text -->
+            <div id="navOverlayText" class="text-white font-bold text-[15px] tracking-tight mb-1.5">Loading...</div>
+            <div id="navOverlaySubText" class="text-slate-500 text-[10px] uppercase tracking-[0.18em] font-semibold mb-8">Please wait</div>
+            <!-- Progress bar -->
+            <div class="w-44 h-[2px] bg-slate-800 rounded-full overflow-hidden">
+                <div id="navProgressBar" class="h-full bg-gradient-to-r from-brand-600 via-brand-400 to-brand-600 rounded-full" style="width:0%"></div>
+            </div>
+        </div>
     </div>
 
     <!-- AUTH PAGE -->
@@ -704,7 +756,7 @@
         const infoContent = document.getElementById('depositInfoContent');
         grid.innerHTML = ''; refWrap.innerHTML = ''; infoContent.innerHTML = '';
         
-        infoContent.innerHTML += `<div class="bg-brand-500/10 border border-brand-500/30 p-4 rounded-xl text-xs text-brand-400 mb-6">One-time Welcome Bonus is credited to your Withdrawable Balance immediately upon approval of your first deposit. <br><br><strong>Note:</strong> Daily Yield is distributed Monday through Friday exclusively (No weekends).<br><br><strong>Maturation:</strong> Capital adheres strictly to a 31-day lock timeline.</div>`;
+        infoContent.innerHTML += `<div class="bg-brand-500/10 border border-brand-500/30 p-4 rounded-xl text-xs text-brand-400 mb-6">One-time Welcome Bonus is credited to your Withdrawable Balance immediately upon approval of your first deposit. <br><br><strong>Note:</strong> Daily Yield is distributed Monday through Friday exclusively (No weekends).<<br><br><strong>Maturation:</strong> Capital adheres strictly to a 31-day lock timeline.</div>`;
 
         TIER_CONFIG.forEach(t => {
             grid.innerHTML += `
@@ -818,6 +870,57 @@
         }, 3500);
     }
 
+    // ── Navigation Loading Overlay ──────────────────────────────────────────
+    let _navLoadingActive = false;
+
+    const NAV_MESSAGES = {
+        dashboardPage : ['Syncing Portfolio…',       'Refreshing Balances…',       'Loading Home…'],
+        depositPage   : ['Loading Deposit Engine…',  'Fetching Tier Data…',        'Preparing Investment Hub…'],
+        withdrawPage  : ['Preparing Payout…',        'Checking Balance…',          'Loading Withdrawal Centre…'],
+        bankSetupPage : ['Loading Bank Settings…',   'Fetching Account Data…',     'Opening Bank Module…'],
+        referralPage  : ['Loading Network…',         'Fetching Referral Data…',    'Opening Referral Hub…'],
+        historyPage   : ['Loading Transactions…',    'Fetching Records…',          'Opening Transaction Log…'],
+        adminPage     : ['Entering Admin Portal…',   'Verifying Privileges…',      'Loading Admin Tools…'],
+    };
+    const NAV_SUBTEXTS = [
+        'Securing Connection', 'Verifying Session',
+        'Encrypting Transfer', 'Syncing Engine',
+        'Fetching Data',       'Authenticating'
+    ];
+
+    function showNavLoader(targetPage, callback) {
+        if (_navLoadingActive) { callback(); return; }
+        _navLoadingActive = true;
+
+        const msgs = NAV_MESSAGES[targetPage] || ['Loading…'];
+        const msg  = msgs[Math.floor(Math.random() * msgs.length)];
+        const sub  = NAV_SUBTEXTS[Math.floor(Math.random() * NAV_SUBTEXTS.length)];
+        const delay = 2000;
+
+        document.getElementById('navOverlayText').textContent    = msg;
+        document.getElementById('navOverlaySubText').textContent = sub;
+
+        // Reset & animate progress bar
+        const bar = document.getElementById('navProgressBar');
+        bar.style.transition = 'none';
+        bar.style.width      = '0%';
+        void bar.offsetWidth; // force reflow
+        bar.style.transition = `width ${delay}ms linear`;
+        bar.style.width      = '100%';
+
+        const ov = document.getElementById('navOverlay');
+        ov.classList.remove('hidden');
+        ov.classList.add('flex');
+
+        setTimeout(() => {
+            ov.classList.add('hidden');
+            ov.classList.remove('flex');
+            _navLoadingActive = false;
+            callback();
+        }, delay);
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     function toggleLoader(show, text = 'Processing...') {
         const loader = document.getElementById('loadingOverlay');
         document.getElementById('loadingText').textContent = text;
@@ -877,12 +980,16 @@
             localStorage.setItem('moblie', rawPhone);
             localStorage.setItem('password', pass);
             
-            showToast('✅ Login Successful');
-            showDashboard();
+            setTimeout(() => {
+                toggleLoader(false);
+                showToast('✅ Login Successful');
+                showDashboard();
+            }, 4000);
         } catch (err) {
-            showToast('❌ ' + err.message);
-        } finally {
-            toggleLoader(false);
+            setTimeout(() => {
+                toggleLoader(false);
+                showToast('❌ ' + err.message);
+            }, 4000);
         }
     }
 
@@ -992,28 +1099,35 @@
 
     function navigateTo(page) {
         if (!currentUser) return;
-        
+        if (_navLoadingActive) return;
+
         if (page === 'adminPage' && currentUser.phone !== 'admin') {
             return showToast('🔒 Unauthorized Access: Admin privileges required.');
         }
 
-        if (page !== 'bankSetupPage' && page !== 'dashboardPage' && page !== 'adminPage' && (!currentUser.bank_name || !currentUser.account_number)) {
+        // Bank-details gate — redirect with overlay
+        if (page !== 'bankSetupPage' && page !== 'dashboardPage' && page !== 'adminPage' &&
+            (!currentUser.bank_name || !currentUser.account_number)) {
             showToast('⚠️ Bank details required first');
-            switchView('bankSetupPage');
+            showNavLoader('bankSetupPage', () => switchView('bankSetupPage'));
             return;
         }
-        
-        if(page === 'historyPage') loadHistory();
-        if(page === 'withdrawPage') prepareWithdrawalView();
-        if(page === 'adminPage') loadAdminData();
-        switchView(page);
+
+        showNavLoader(page, () => {
+            if (page === 'historyPage')   loadHistory();
+            if (page === 'withdrawPage')  prepareWithdrawalView();
+            if (page === 'adminPage')     loadAdminData();
+            switchView(page);
+        });
     }
 
     function goBackToDashboard() {
-        switchView('dashboardPage');
-        selectedDepositAmount = null;
-        document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('border-brand-500', 'bg-brand-900/20'));
-        document.getElementById('tierSelectedDisplay').classList.add('hidden');
+        showNavLoader('dashboardPage', () => {
+            switchView('dashboardPage');
+            selectedDepositAmount = null;
+            document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('border-brand-500', 'bg-brand-900/20'));
+            document.getElementById('tierSelectedDisplay').classList.add('hidden');
+        });
     }
 
     function navBottom(page) {
@@ -1153,7 +1267,11 @@
         if(currentUser.locked_capital > 0 && selectedDepositAmount <= currentUser.locked_capital) {
             return showToast('🚫 Active Plan Exists. To expand, select a higher tier.');
         }
-        openCheckoutPage(selectedDepositAmount);
+        toggleLoader(true, 'Preparing Secure Checkout...');
+        setTimeout(() => {
+            toggleLoader(false);
+            openCheckoutPage(selectedDepositAmount);
+        }, 4000);
     }
 
     let checkoutTimer;
@@ -1248,7 +1366,7 @@
                 `<span class="text-brand-400"><i class="ph-bold ph-check-circle"></i> It's Payday! You can withdraw all balances.</span>` : 
                 `<span class="text-amber-400"><i class="ph-bold ph-warning"></i> Today is not Friday. Only Welcome Bonuses are withdrawable today.</span>`;
 
-            document.getElementById('withdrawHintText').innerHTML = `Min. payout for ${tier.name} is <span class="text-white">₦${fmt(tier.minWithdrawal)}</span>.<br>Processing fee: ₦${fmt(tier.withdrawalFee)}/txn.<br><div class="mt-2 pt-2 border-t border-slate-700/50 font-medium">${paydayHint}</div>`;
+            document.getElementById('withdrawHintText').innerHTML = `Min. payout for ${tier.name} is <span class="text-white">₦${fmt(tier.minWithdrawal)}</span>.<<br>Processing fee: ₦${fmt(tier.withdrawalFee)}/txn.<br><div class="mt-2 pt-2 border-t border-slate-700/50 font-medium">${paydayHint}</div>`;
             document.getElementById('withdrawHint').classList.remove('hidden');
         }
     }
