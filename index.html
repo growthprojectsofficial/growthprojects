@@ -18,6 +18,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Regional Banking Config (loaded before app logic) -->
+    <script src="config.js"></script>
+
     <!-- Tailwind Config & Custom CSS -->
     <script>
         tailwind.config = {
@@ -43,10 +46,10 @@
     <style type="text/tailwindcss">
         @layer utilities {
             .glass-card {
-                @apply bg-slate-900/50 backdrop-blur-xl border border-slate-800 shadow-xl;
+                @apply bg-slate-900/60 backdrop-blur-lg border border-slate-800 shadow-xl;
             }
             .glass-input {
-                @apply bg-slate-900/50 border border-slate-700 focus-within:border-brand-500 focus-within:shadow-[0_0_12px_rgba(16,185,129,0.2)] transition-all;
+                @apply bg-slate-900/50 backdrop-blur-md border border-slate-700 focus-within:border-brand-500 focus-within:shadow-[0_0_12px_rgba(16,185,129,0.2)] transition-all;
             }
             .glow-btn {
                 @apply bg-gradient-to-r from-brand-600 to-brand-400 text-slate-950 font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 hover:shadow-[0_0_25px_rgba(16,185,129,0.5)];
@@ -66,11 +69,26 @@
             .toast-animate {
                 animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             }
+            /* Rewards Glow Animation */
+            @keyframes rewardsGlow {
+                0%, 100% { box-shadow: 0 0 18px rgba(245,158,11,0.25), 0 0 40px rgba(245,158,11,0.08); }
+                50%       { box-shadow: 0 0 32px rgba(245,158,11,0.45), 0 0 70px rgba(245,158,11,0.18); }
+            }
+            .rewards-glow {
+                animation: rewardsGlow 2.4s ease-in-out infinite;
+            }
+            @keyframes floatGift {
+                0%, 100% { transform: translateY(0px); }
+                50%       { transform: translateY(-8px); }
+            }
+            .float-gift {
+                animation: floatGift 2.8s ease-in-out infinite;
+            }
         }
 
         body {
-            background-color: #020617; /* slate-950 */
-            color: #e2e8f0; /* slate-200 */
+            background-color: #020617;
+            color: #e2e8f0;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -90,19 +108,14 @@
 
 <div class="w-full max-w-md min-h-[100dvh] bg-slate-950 relative flex flex-col shadow-2xl shadow-black/50 overflow-x-hidden">
 
-    <!-- ════════════════════════════════════════
-         GLOBAL OVERLAYS
-    ════════════════════════════════════════ -->
+    <!-- OVERLAYS -->
     <div id="loadingOverlay" class="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md hidden flex-col items-center justify-center">
         <div class="spinner mb-4"></div>
         <div id="loadingText" class="text-slate-300 font-medium tracking-wide">Processing...</div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         AUTH PAGE
-    ════════════════════════════════════════ -->
+    <!-- AUTH PAGE -->
     <div id="authPage" class="flex flex-col min-h-[100dvh] relative z-10">
-        <!-- Hero Background Effects -->
         <div class="absolute top-[-100px] right-[-100px] w-64 h-64 bg-brand-500/20 rounded-full blur-[80px]"></div>
         <div class="absolute top-[20%] left-[-100px] w-64 h-64 bg-blue-500/20 rounded-full blur-[80px]"></div>
 
@@ -116,7 +129,6 @@
         </div>
 
         <div class="flex-1 px-6 pb-12 relative z-10">
-            <!-- Tabs -->
             <div class="flex bg-slate-900/80 backdrop-blur-md p-1.5 rounded-full border border-slate-800 mb-8">
                 <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-3 text-sm font-semibold rounded-full bg-slate-800 text-white shadow-md transition-all">Login</button>
                 <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-3 text-sm font-semibold rounded-full text-slate-400 hover:text-white transition-all">Sign Up</button>
@@ -133,7 +145,7 @@
                     <i class="ph ph-lock-key text-slate-400 text-xl mr-3"></i>
                     <input type="password" id="loginPassword" class="bg-transparent w-full h-full outline-none text-slate-200 placeholder-slate-600" placeholder="Password" autocomplete="off">
                 </div>
-                <button id="btnLogin" class="glow-btn w-full h-14 rounded-full mt-6 text-[15px] flex items-center justify-center gap-2">
+                <button type="button" onclick="handleLogin()" class="glow-btn w-full h-14 rounded-full mt-6 text-[15px] flex items-center justify-center gap-2">
                     Access Portfolio <i class="ph-bold ph-arrow-right"></i>
                 </button>
             </div>
@@ -150,23 +162,32 @@
                     <input type="password" id="signupPassword" class="bg-transparent w-full h-full outline-none text-slate-200 placeholder-slate-600" placeholder="Create Password" autocomplete="off">
                 </div>
                 <div class="glass-input flex items-center h-14 rounded-full px-5">
+                    <i class="ph ph-map-pin text-slate-400 text-xl mr-3"></i>
+                    <select id="signupRegion" class="bg-transparent w-full h-full outline-none text-slate-200 appearance-none">
+                        <option value="" disabled selected class="bg-slate-900 text-slate-500">Select Region</option>
+                        <option value="North-Central" class="bg-slate-900">North-Central</option>
+                        <option value="North-West" class="bg-slate-900">North-West</option>
+                        <option value="North-East" class="bg-slate-900">North-East</option>
+                        <option value="South-West" class="bg-slate-900">South-West</option>
+                        <option value="South-South" class="bg-slate-900">South-South</option>
+                        <option value="South-East" class="bg-slate-900">South-East</option>
+                    </select>
+                </div>
+                <div class="glass-input flex items-center h-14 rounded-full px-5">
                     <i class="ph ph-users text-slate-400 text-xl mr-3"></i>
                     <input type="text" id="signupReferral" class="bg-transparent w-full h-full outline-none text-slate-200 placeholder-slate-600" placeholder="Referral Code (Optional)" autocomplete="off">
                 </div>
-                <button id="btnSignup" class="glow-btn w-full h-14 rounded-full mt-6 text-[15px] flex items-center justify-center gap-2">
+                <button type="button" onclick="processSignup()" class="glow-btn w-full h-14 rounded-full mt-6 text-[15px] flex items-center justify-center gap-2">
                     Create Account <i class="ph-bold ph-user-plus"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         DASHBOARD PAGE
-    ════════════════════════════════════════ -->
+    <!-- DASHBOARD PAGE -->
     <div id="dashboardPage" class="hidden flex-col min-h-[100dvh] pb-24 relative">
         <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-[80px] pointer-events-none"></div>
 
-        <!-- Header -->
         <div class="flex items-center justify-between px-6 py-6 pt-8 z-10 relative">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
@@ -182,7 +203,6 @@
             </button>
         </div>
 
-        <!-- Balance Card -->
         <div class="px-6 mb-6 z-10 relative">
             <div class="glass-card rounded-3xl p-6 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-10">
@@ -214,7 +234,6 @@
             </div>
         </div>
 
-        <!-- Bank Setup Banner -->
         <div id="bankLockBanner" onclick="navigateTo('bankSetupPage')" class="hidden mx-6 mb-6 glass-card border-amber-500/30 bg-amber-500/5 rounded-2xl p-4 flex items-center gap-4 cursor-pointer hover:bg-amber-500/10 transition z-10 relative">
             <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
                 <i class="ph-fill ph-bank text-amber-400 text-xl"></i>
@@ -226,7 +245,6 @@
             <i class="ph-bold ph-caret-right text-amber-400/50"></i>
         </div>
 
-        <!-- Quick Actions -->
         <div class="px-6 grid grid-cols-2 gap-4 z-10 relative">
             <button onclick="navigateTo('bankSetupPage')" class="glass-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 transition active:scale-95 hover:bg-slate-800/50">
                 <i class="ph-duotone ph-bank text-3xl text-blue-400"></i>
@@ -241,11 +259,47 @@
                 <span class="text-sm font-semibold text-red-400">Secure Logout</span>
             </button>
         </div>
+
+        <!-- REWARDS SECTION -->
+        <div class="px-6 mt-4 pb-2 z-10 relative">
+            <button onclick="document.getElementById('rewardsModal').classList.remove('hidden')" class="rewards-glow w-full relative overflow-hidden glass-card rounded-2xl p-5 flex items-center gap-4 border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-slate-900/60 to-brand-500/10 transition-all active:scale-95">
+                <div class="absolute inset-0 bg-gradient-to-r from-amber-400/5 via-transparent to-brand-400/5 pointer-events-none"></div>
+                <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <i class="ph-fill ph-gift text-3xl text-amber-400"></i>
+                </div>
+                <div class="flex-1 text-left relative z-10">
+                    <div class="text-white font-bold text-base tracking-tight">Rewards</div>
+                    <div class="text-amber-400/70 text-xs mt-0.5 font-medium">Tap to view your gift rewards</div>
+                </div>
+                <i class="ph-bold ph-caret-right text-amber-400/50 relative z-10 text-lg"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         DEPOSIT PAGE
-    ════════════════════════════════════════ -->
+    <!-- REWARDS MODAL -->
+    <div id="rewardsModal" class="hidden fixed inset-0 z-[99000] flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onclick="document.getElementById('rewardsModal').classList.add('hidden')"></div>
+        <div class="relative z-10 w-full max-w-sm glass-card rounded-3xl border border-amber-500/30 bg-gradient-to-b from-slate-900 to-slate-950 overflow-hidden shadow-[0_0_60px_rgba(245,158,11,0.2)]">
+            <div class="h-1 w-full bg-gradient-to-r from-amber-500 via-brand-400 to-amber-500 opacity-70"></div>
+            <div class="p-8 flex flex-col items-center text-center relative">
+                <button onclick="document.getElementById('rewardsModal').classList.add('hidden')" class="absolute top-3 right-3 w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+                <div class="float-gift text-[88px] leading-none mb-2 select-none" aria-label="Gift basket">&#127873;</div>
+                <div class="flex gap-1 mb-5 text-amber-400">
+                    <span class="text-base">&#10022;</span>
+                    <span class="text-xs opacity-70">&#10022;</span>
+                    <span class="text-base">&#10022;</span>
+                </div>
+                <h3 class="text-xl font-extrabold text-white tracking-tight mb-2">Lucky Rewards</h3>
+                <p class="text-amber-400/80 text-sm font-medium">Coming soon</p>
+                <div class="mt-6 w-full h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+                <p class="mt-4 text-slate-500 text-[11px] leading-relaxed">Exclusive gift rewards will be available to active portfolio members. Stay tuned for announcements.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEPOSIT PAGE -->
     <div id="depositPage" class="hidden flex-col min-h-[100dvh] pb-24 bg-slate-950 z-20">
         <div class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 py-4">
             <button onclick="goBackToDashboard()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-900 transition">
@@ -259,23 +313,15 @@
 
         <div class="p-6">
             <div class="text-xs font-bold tracking-widest text-slate-500 uppercase mb-4">Select Investment Tier</div>
-            <div id="tierGrid" class="grid grid-cols-2 gap-3 mb-6">
-                <!-- Injected via JS -->
-            </div>
-
-            <div id="tierSelectedDisplay" class="glass-card rounded-2xl p-4 mb-6 text-sm text-slate-400 leading-relaxed border-brand-500/30 hidden">
-                <!-- Injected via JS -->
-            </div>
-
+            <div id="tierGrid" class="grid grid-cols-2 gap-3 mb-6"></div>
+            <div id="tierSelectedDisplay" class="glass-card rounded-2xl p-4 mb-6 text-sm text-slate-400 leading-relaxed border-brand-500/30 hidden"></div>
             <button onclick="confirmDeposit()" class="glow-btn w-full h-14 rounded-full text-[15px] flex items-center justify-center gap-2">
                 Proceed to Secure Payment <i class="ph-bold ph-lock-key"></i>
             </button>
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         CHECKOUT OVERLAY
-    ════════════════════════════════════════ -->
+    <!-- CHECKOUT OVERLAY (Secure Regional Banking) -->
     <div id="checkoutPage" class="fixed inset-0 z-[9000] bg-slate-950 flex-col overflow-y-auto hidden">
         <div class="sticky top-0 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 py-4">
             <button onclick="cancelCheckout()" class="text-slate-400 text-sm font-semibold hover:text-white">✕ Cancel</button>
@@ -295,22 +341,30 @@
                 <div id="checkoutTierDisplay" class="text-sm text-slate-400 font-medium">Selected Tier</div>
             </div>
 
-            <div class="w-full glass-card rounded-2xl p-5 mb-6 space-y-4">
-                <div class="text-[10px] font-bold tracking-widest text-slate-500 uppercase">Transfer Details</div>
+            <div class="w-full glass-card rounded-2xl p-5 mb-6 space-y-4 relative overflow-hidden">
+                <!-- SECURE REVEAL OVERLAY -->
+                <div id="checkoutRevealContainer" class="absolute inset-0 bg-slate-900/95 backdrop-blur-md z-20 flex flex-col items-center justify-center cursor-pointer transition-all duration-300" onclick="revealCheckoutAcc()">
+                    <div class="w-12 h-12 rounded-full bg-brand-500/20 flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        <i class="ph-fill ph-eye text-brand-400 text-2xl"></i>
+                    </div>
+                    <span class="text-brand-400 font-bold text-sm">Tap to Reveal Account Details</span>
+                </div>
+
+                <div class="text-[10px] font-bold tracking-widest text-slate-500 uppercase">Regional Transfer Details</div>
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                     <span class="text-xs text-slate-400">Bank Name</span>
-                    <span class="text-sm font-bold text-white">First Bank</span>
+                    <span id="checkoutBankName" class="text-sm font-bold text-white">—</span>
                 </div>
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                     <span class="text-xs text-slate-400">Account No.</span>
                     <div class="flex items-center gap-3">
-                        <span id="checkoutAccNum" class="text-sm font-bold text-white">3153920748</span>
-                        <button onclick="copyCheckoutAcc()" class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-[10px] font-bold uppercase hover:bg-slate-700">Copy</button>
+                        <span id="checkoutAccNum" class="text-sm font-bold text-white">—</span>
+                        <button id="checkoutCopyBtn" onclick="copyCheckoutAcc()" class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-[10px] font-bold uppercase hover:bg-slate-700">Copy</button>
                     </div>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-xs text-slate-400">Account Name</span>
-                    <span class="text-sm font-bold text-white">Growth Project Ltd</span>
+                    <span id="checkoutAccName" class="text-sm font-bold text-white">—</span>
                 </div>
             </div>
 
@@ -320,9 +374,7 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         WITHDRAW PAGE
-    ════════════════════════════════════════ -->
+    <!-- WITHDRAW PAGE -->
     <div id="withdrawPage" class="hidden flex-col min-h-[100dvh] pb-24 bg-slate-950 z-20">
         <div class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 py-4">
             <button onclick="goBackToDashboard()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-900 transition">
@@ -338,11 +390,11 @@
             <div class="glass-card bg-amber-500/5 border-amber-500/20 p-4 rounded-2xl flex gap-3">
                 <i class="ph-fill ph-calendar text-amber-400 text-xl flex-shrink-0"></i>
                 <p class="text-xs text-amber-400/80 leading-relaxed">
-                    Withdrawals are processed <strong>bi-weekly on Fridays</strong>. Minimum balance applies based on your tier.
+                    Yields & Referrals are processed <strong>every Friday</strong>. Welcome Bonuses can be withdrawn instantly on any day. Minimum balance applies.
                 </p>
             </div>
 
-            <div id="withdrawHint" class="hidden glass-card bg-slate-900 border-slate-800 p-4 rounded-2xl text-xs text-slate-400 leading-relaxed">
+            <div id="withdrawHint" class="hidden glass-card p-4 rounded-2xl text-xs text-slate-400 leading-relaxed">
                 <span class="font-bold text-slate-300 block mb-1">Minimum Rule:</span>
                 <span id="withdrawHintText"></span>
             </div>
@@ -371,9 +423,7 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         REFERRAL PAGE
-    ════════════════════════════════════════ -->
+    <!-- REFERRAL PAGE -->
     <div id="referralPage" class="hidden flex-col min-h-[100dvh] pb-24 bg-slate-950 z-20">
         <div class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 py-4">
             <button onclick="goBackToDashboard()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-900 transition">
@@ -386,10 +436,8 @@
         <div class="p-6">
             <div class="glass-card bg-gradient-to-b from-slate-900 to-slate-900/50 rounded-3xl p-8 text-center relative overflow-hidden mb-6">
                 <div class="absolute top-[-50px] right-[-50px] w-32 h-32 bg-amber-500/20 rounded-full blur-[40px]"></div>
-                
                 <div class="text-xs font-bold tracking-widest text-slate-400 uppercase mb-2">Your Unique Code</div>
                 <div id="userReferralCode" class="text-3xl font-black text-amber-400 tracking-wider mb-6 font-mono bg-slate-950 border border-amber-500/20 py-3 rounded-xl shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">LOADING</div>
-                
                 <div class="flex flex-col gap-3">
                     <button onclick="copyCode(false)" class="bg-slate-800 text-white font-bold py-3.5 rounded-xl border border-slate-700 hover:bg-slate-700 transition flex items-center justify-center gap-2">
                         <i class="ph-bold ph-copy"></i> Copy Code
@@ -399,21 +447,15 @@
                     </button>
                 </div>
             </div>
-
             <div class="text-sm text-slate-400 leading-relaxed mb-6">
-                Share your code with friends. When they make their first confirmed deposit, <strong class="text-brand-400">you earn an instant bonus</strong> based on their tier!
+                Share your code. When a friend makes their first confirmed deposit, <strong class="text-brand-400">you earn an instant bonus</strong> based on their tier!
             </div>
-
             <div class="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">Referral Rewards</div>
-            <div id="referralTiersWrap" class="space-y-2">
-                <!-- Injected via JS -->
-            </div>
+            <div id="referralTiersWrap" class="space-y-2"></div>
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         BANK SETUP PAGE
-    ════════════════════════════════════════ -->
+    <!-- BANK SETUP PAGE -->
     <div id="bankSetupPage" class="hidden flex-col min-h-[100dvh] pb-24 bg-slate-950 z-20">
         <div class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 py-4">
             <button onclick="goBackToDashboard()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-900 transition">
@@ -422,7 +464,6 @@
             <h2 class="text-lg font-bold text-white">Bank Settings</h2>
             <div class="w-10"></div>
         </div>
-
         <div class="p-6 space-y-6">
             <div id="savedBankPreview" class="hidden glass-card bg-brand-500/5 border-brand-500/30 p-5 rounded-2xl relative overflow-hidden">
                 <div class="absolute right-0 top-0 mt-4 mr-4 text-brand-500/20">
@@ -437,7 +478,6 @@
                     <div><span class="text-[10px] text-slate-500 uppercase font-bold block">Name</span><span id="savedAccName" class="text-sm text-white font-medium"></span></div>
                 </div>
             </div>
-
             <div>
                 <div class="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">Update Bank Details</div>
                 <div class="space-y-4">
@@ -455,16 +495,13 @@
                     </div>
                 </div>
             </div>
-
             <button onclick="saveBankDetails()" class="glow-btn w-full h-14 rounded-full text-[15px] flex items-center justify-center gap-2">
                 Securely Save Bank <i class="ph-bold ph-shield-check"></i>
             </button>
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         HISTORY PAGE
-    ════════════════════════════════════════ -->
+    <!-- HISTORY PAGE -->
     <div id="historyPage" class="hidden flex-col min-h-[100dvh] pb-24 bg-slate-950 z-20">
         <div class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 py-4">
             <button onclick="goBackToDashboard()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-900 transition">
@@ -478,12 +515,8 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         ADMIN PAGE
-    ════════════════════════════════════════ -->
+    <!-- ADMIN PAGE -->
     <div id="adminPage" class="hidden flex-col min-h-[100dvh] bg-slate-950 z-40 pb-24">
-
-        <!-- Header -->
         <div class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <i class="ph-fill ph-shield-star text-amber-400 text-xl"></i>
@@ -495,45 +528,30 @@
         </div>
 
         <div class="p-4 space-y-5">
-
-            <!-- ── Daily Yield Distribution Card ─────────────────────── -->
-            <div class="glass-card border-brand-500/30 bg-gradient-to-br from-brand-900/30 to-slate-900/60 rounded-2xl p-5">
-                <div class="flex items-start gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-brand-500/20 flex items-center justify-center flex-shrink-0">
-                        <i class="ph-fill ph-currency-circle-dollar text-brand-400 text-xl"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-bold text-white">Daily Yield Distribution</div>
-                        <div class="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                            Credits each active investor's daily interest to their balance. 
-                            <strong class="text-amber-400">Once per day only</strong> — locked midnight to midnight. 
-                            Users who deposit after today's run will start earning from tomorrow's distribution.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lock status strip — injected by checkDistributionStatus() -->
-                <div id="yieldLockStrip" class="rounded-xl p-3 mb-4 text-xs leading-relaxed hidden"></div>
-
-                <!-- Countdown — shown when locked -->
-                <div id="yieldCountdownWrap" class="hidden flex items-center justify-center gap-3 bg-slate-800/60 border border-slate-700 rounded-xl p-3 mb-4">
-                    <i class="ph-fill ph-lock text-slate-400 text-lg flex-shrink-0"></i>
-                    <div class="text-center">
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Unlocks in</div>
-                        <div id="yieldCountdown" class="text-xl font-extrabold text-white font-mono tracking-widest">00:00:00</div>
-                    </div>
-                </div>
-
-                <!-- Progress/result bar -->
-                <div id="yieldStatusBar" class="hidden bg-slate-800 rounded-xl p-3 mb-4 text-xs text-slate-300 leading-relaxed"></div>
-
-                <!-- The button — enabled/disabled by checkDistributionStatus() -->
-                <button id="distributeBtn" onclick="distributeGlobalInterest()" class="glow-btn w-full h-12 rounded-full flex items-center justify-center gap-2 text-sm font-bold">
-                    <i class="ph-bold ph-play-circle text-lg"></i> Run Daily Yield Distribution
+            <!-- Daily Distribution Control Panel -->
+            <div class="glass-card rounded-2xl p-5 border-brand-500/30 bg-brand-900/10 mb-2">
+                <h3 class="text-xs font-bold text-brand-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i class="ph-bold ph-globe-hemisphere-west"></i> Global Operations
+                </h3>
+                <button id="distributeBtn" onclick="distributeGlobalInterest()" class="glow-btn w-full h-12 rounded-xl text-[13px] flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-coins text-lg"></i> Run Daily Distribution
                 </button>
+                <div id="distProgress" class="hidden mt-3 text-[11px] font-medium text-brand-400/90 text-center bg-brand-500/10 p-2.5 rounded-lg border border-brand-500/20 leading-relaxed"></div>
             </div>
 
-            <!-- ── Admin Tabs ─────────────────────────────────────────── -->
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Region Filter</span>
+                <select id="adminRegionFilter" onchange="loadAdminData()" class="bg-slate-800 text-white text-xs rounded-lg px-3 py-1.5 outline-none border border-slate-700">
+                    <option value="All">All Regions</option>
+                    <option value="North-Central">North-Central</option>
+                    <option value="North-West">North-West</option>
+                    <option value="North-East">North-East</option>
+                    <option value="South-West">South-West</option>
+                    <option value="South-South">South-South</option>
+                    <option value="South-East">South-East</option>
+                </select>
+            </div>
+
             <div class="flex bg-slate-900/80 backdrop-blur p-1 rounded-full border border-slate-800">
                 <button onclick="switchAdminTab('deposits')" id="adminTabDep" class="flex-1 py-2.5 text-xs font-bold rounded-full bg-slate-800 text-white shadow-md transition-all flex items-center justify-center gap-1.5">
                     <i class="ph-fill ph-arrow-circle-down text-amber-400"></i> Deposits
@@ -545,7 +563,6 @@
                 </button>
             </div>
 
-            <!-- ── Pending Deposits ───────────────────────────────────── -->
             <div id="adminPanelDeposits">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pending Deposits</h3>
@@ -558,7 +575,6 @@
                 </div>
             </div>
 
-            <!-- ── Pending Withdrawals ────────────────────────────────── -->
             <div id="adminPanelWithdrawals" class="hidden">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pending Withdrawals</h3>
@@ -570,35 +586,30 @@
                     <div class="text-center text-slate-500 text-xs py-6">Loading…</div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════
-         STICKY BOTTOM NAVIGATION
-    ════════════════════════════════════════ -->
+    <!-- BOTTOM NAV -->
     <nav id="bottomNav" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-[80px] bg-slate-950/90 backdrop-blur-xl border-t border-slate-800 z-[50] flex items-center justify-around px-2 pb-safe">
         <button onclick="navBottom('dashboardPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group active" data-target="dashboardPage">
-            <i class="ph-fill ph-house text-2xl text-slate-500 group-[.active]:text-brand-400 group-[.active]:drop-shadow-[0_0_8px_rgba(16,185,129,0.8)] transition-all duration-300"></i>
+            <i class="ph-fill ph-house text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Home</span>
         </button>
         <button onclick="navBottom('depositPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group" data-target="depositPage">
-            <i class="ph-fill ph-wallet text-2xl text-slate-500 group-[.active]:text-brand-400 group-[.active]:drop-shadow-[0_0_8px_rgba(16,185,129,0.8)] transition-all duration-300"></i>
+            <i class="ph-fill ph-wallet text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Deposit</span>
         </button>
         <button onclick="navBottom('withdrawPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group" data-target="withdrawPage">
-            <i class="ph-fill ph-paper-plane-tilt text-2xl text-slate-500 group-[.active]:text-brand-400 group-[.active]:drop-shadow-[0_0_8px_rgba(16,185,129,0.8)] transition-all duration-300"></i>
+            <i class="ph-fill ph-paper-plane-tilt text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Withdraw</span>
         </button>
         <button onclick="navBottom('referralPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group" data-target="referralPage">
-            <i class="ph-fill ph-users-three text-2xl text-slate-500 group-[.active]:text-brand-400 group-[.active]:drop-shadow-[0_0_8px_rgba(16,185,129,0.8)] transition-all duration-300"></i>
+            <i class="ph-fill ph-users-three text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Referrals</span>
         </button>
     </nav>
 
-    <!-- ════════════════════════════════════════
-         INFO MODALS (Deposit & Withdraw Rules)
-    ════════════════════════════════════════ -->
+    <!-- INFO MODALS -->
     <div id="depositInfoModal" class="hidden fixed inset-0 z-[100] flex flex-col justify-end">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
         <div class="bg-slate-900 border-t border-slate-800 rounded-t-3xl relative z-10 max-h-[85vh] flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
@@ -607,9 +618,7 @@
                 <h3 class="text-white font-bold text-lg">Investment Rules</h3>
                 <button onclick="document.getElementById('depositInfoModal').classList.add('hidden')" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto hide-scrollbar space-y-6" id="depositInfoContent">
-                <!-- Injected via JS -->
-            </div>
+            <div class="p-6 overflow-y-auto hide-scrollbar space-y-6" id="depositInfoContent"></div>
         </div>
     </div>
     
@@ -621,67 +630,83 @@
                 <button onclick="document.getElementById('withdrawInfoModal').classList.add('hidden')" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x"></i></button>
             </div>
             <div class="glass-card bg-slate-800/50 p-4 rounded-xl text-sm text-slate-300 leading-relaxed mb-4">
-                Withdrawals are processed exclusively on <strong>bi-weekly Fridays</strong> (Platform Payday).
+                <strong class="text-brand-400 block mb-1">Weekly Payouts (Yields & Referrals):</strong>
+                Withdrawals for daily compounding yields and referral bonuses are processed exclusively <strong>every Friday</strong> (Platform Payday).
             </div>
-            <div class="glass-card bg-slate-800/50 p-4 rounded-xl text-sm text-slate-300 leading-relaxed">
-                A minimum balance of <strong>10 days worth of trading yield</strong> must be accumulated prior to withdrawal to ensure sustainable daily compounding. Processing fees apply per tier.
+            <div class="glass-card bg-slate-800/50 p-4 rounded-xl text-sm text-slate-300 leading-relaxed mb-4">
+                <strong class="text-brand-400 block mb-1">Instant Bonuses:</strong>
+                Your 10% Welcome Bonus is exempt from the Friday restriction and can be withdrawn <strong>instantly on any day of the week.</strong>
+            </div>
+            <div class="glass-card bg-slate-800/50 p-4 rounded-xl text-sm text-slate-300 leading-relaxed mb-4">
+                <strong class="text-brand-400 block mb-1">Capital Maturation Rule:</strong>
+                Locked principal capital strictly adheres to the standard <strong>31-day maturation timeline</strong> before full unlock and availability.
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     APPLICATION LOGIC
-═══════════════════════════════════════════════════════════════ -->
+<!-- TELEGRAM BUTTON -->
+<a id="telegramBtn" href="https://t.me/+yKTzqU341V80NWU0" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 w-[52px] h-[52px] bg-gradient-to-br from-brand-600 to-brand-400 rounded-full flex items-center justify-center text-slate-950 text-2xl shadow-[0_0_20px_rgba(16,185,129,0.35)] cursor-grab z-[1000] hover:scale-110 transition-transform touch-none">
+    <i class="ph-fill ph-telegram-logo"></i>
+</a>
+
 <script>
-    // Supabase Setup
-    const SUPABASE_URL      = 'https://rodsqnnfmgrwdlokiehm.supabase.co';
+    const SUPABASE_URL = 'https://rodsqnnfmgrwdlokiehm.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZHNxbm5mbWdyd2Rsb2tpZWhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMDkyNDgsImV4cCI6MjA5NDU4NTI0OH0.GPpgVd7FViT2zSRcU6Twf0esm9p3GqWAz_AWIsJ4y6c';
     
     let supabase;
     if (window.supabase) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-        console.error("Supabase CDN blocked or failed to load.");
     }
 
-    // ═══════════════════════════════════════════════════
-    // UPDATED 31-DAY CYCLE TIER CONFIGURATION
-    // ═══════════════════════════════════════════════════
     const TIER_CONFIG = [
-        { tier: 1,  deposit: 8000,   dailyInterest: 260,  welcomeBonus: 800,   referralBonus: 1200,  minWithdrawal: 2600,  withdrawalFee: 500,  name: 'Starter' },
-        { tier: 2,  deposit: 12000,  dailyInterest: 390,  welcomeBonus: 1200,  referralBonus: 1800,  minWithdrawal: 3900,  withdrawalFee: 500,  name: 'Basic' },
-        { tier: 3,  deposit: 15000,  dailyInterest: 480,  welcomeBonus: 1500,  referralBonus: 2200,  minWithdrawal: 4800,  withdrawalFee: 500,  name: 'Bronze' },
-        { tier: 4,  deposit: 20000,  dailyInterest: 650,  welcomeBonus: 2000,  referralBonus: 3000,  minWithdrawal: 6500,  withdrawalFee: 1000, name: 'Classic' },
-        { tier: 5,  deposit: 25000,  dailyInterest: 810,  welcomeBonus: 2500,  referralBonus: 3700,  minWithdrawal: 8100,  withdrawalFee: 1000, name: 'Silver' },
-        { tier: 6,  deposit: 35000,  dailyInterest: 1130, welcomeBonus: 3500,  referralBonus: 5200,  minWithdrawal: 11300, withdrawalFee: 1000, name: 'Gold' },
-        { tier: 7,  deposit: 40000,  dailyInterest: 1290, welcomeBonus: 4000,  referralBonus: 6000,  minWithdrawal: 12900, withdrawalFee: 1000, name: 'Plus' },
-        { tier: 8,  deposit: 50000,  dailyInterest: 1610, welcomeBonus: 5000,  referralBonus: 7500,  minWithdrawal: 16100, withdrawalFee: 2000, name: 'Advanced' },
-        { tier: 9,  deposit: 65000,  dailyInterest: 2100, welcomeBonus: 6500,  referralBonus: 9700,  minWithdrawal: 21000, withdrawalFee: 2000, name: 'Platinum' },
-        { tier: 10, deposit: 100000, dailyInterest: 3230, welcomeBonus: 10000, referralBonus: 15000, minWithdrawal: 32300, withdrawalFee: 2000, name: 'Elite' },
-        { tier: 11, deposit: 150000, dailyInterest: 4840, welcomeBonus: 15000, referralBonus: 22500, minWithdrawal: 48400, withdrawalFee: 5000, name: 'Diamond' },
-        { tier: 12, deposit: 210000, dailyInterest: 6770, welcomeBonus: 21000, referralBonus: 31500, minWithdrawal: 67700, withdrawalFee: 5000, name: 'Premium' },
+        { tier: 1,  deposit: 8000,   dailyInterest: 320,  welcomeBonus: 800,   referralBonus: 1200,  minWithdrawal: 2600,  withdrawalFee: 500,  name: 'Tier 1' },
+        { tier: 2,  deposit: 12000,  dailyInterest: 480,  welcomeBonus: 1200,  referralBonus: 1800,  minWithdrawal: 3900,  withdrawalFee: 500,  name: 'Tier 2' },
+        { tier: 3,  deposit: 15000,  dailyInterest: 600,  welcomeBonus: 1500,  referralBonus: 2200,  minWithdrawal: 4800,  withdrawalFee: 500,  name: 'Tier 3' },
+        { tier: 4,  deposit: 20000,  dailyInterest: 800,  welcomeBonus: 2000,  referralBonus: 3000,  minWithdrawal: 6500,  withdrawalFee: 1000, name: 'Tier 4' },
+        { tier: 5,  deposit: 25000,  dailyInterest: 1000, welcomeBonus: 2500,  referralBonus: 3700,  minWithdrawal: 8100,  withdrawalFee: 1000, name: 'Tier 5' },
+        { tier: 6,  deposit: 35000,  dailyInterest: 1400, welcomeBonus: 3500,  referralBonus: 5200,  minWithdrawal: 11300, withdrawalFee: 1000, name: 'Tier 6' },
+        { tier: 7,  deposit: 40000,  dailyInterest: 1600, welcomeBonus: 4000,  referralBonus: 6000,  minWithdrawal: 12900, withdrawalFee: 1000, name: 'Tier 7' },
+        { tier: 8,  deposit: 50000,  dailyInterest: 2000, welcomeBonus: 5000,  referralBonus: 7500,  minWithdrawal: 16100, withdrawalFee: 2000, name: 'Tier 8' },
+        { tier: 9,  deposit: 65000,  dailyInterest: 2600, welcomeBonus: 6500,  referralBonus: 9700,  minWithdrawal: 21000, withdrawalFee: 2000, name: 'Tier 9' },
+        { tier: 10, deposit: 100000, dailyInterest: 4000, welcomeBonus: 10000, referralBonus: 15000, minWithdrawal: 32300, withdrawalFee: 2000, name: 'Tier 10' },
+        { tier: 11, deposit: 150000, dailyInterest: 6000, welcomeBonus: 15000, referralBonus: 22500, minWithdrawal: 48400, withdrawalFee: 5000, name: 'Tier 11' },
+        { tier: 12, deposit: 210000, dailyInterest: 8400, welcomeBonus: 21000, referralBonus: 31500, minWithdrawal: 67700, withdrawalFee: 5000, name: 'Tier 12' },
+        { tier: 13, deposit: 250000, dailyInterest: 10000, welcomeBonus: 25000, referralBonus: 37500, minWithdrawal: 80000, withdrawalFee: 5000, name: 'Tier 13', premium: true },
+        { tier: 14, deposit: 560000, dailyInterest: 22400, welcomeBonus: 56000, referralBonus: 84000, minWithdrawal: 180000, withdrawalFee: 10000, name: 'Tier 14', premium: true },
+        { tier: 15, deposit: 1100000, dailyInterest: 44000, welcomeBonus: 110000, referralBonus: 165000, minWithdrawal: 350000, withdrawalFee: 15000, name: 'Tier 15', premium: true }
     ];
 
     let currentUser = null;
     let selectedDepositAmount = null;
 
-    // ═══════════════════════════════════════════════════
-    // UI GENERATORS
-    // ═══════════════════════════════════════════════════
     function fmt(num) { return num.toLocaleString('en-NG'); }
 
+    // UNIVERSAL HISTORY LOGGER
+    async function writeHistory(userId, description, type = 'general', amount = 0, status = 'confirmed') {
+        try {
+            await supabase.from('history').insert([{
+                user_id: userId,
+                type: type,
+                amount: parseFloat(amount) || 0,
+                description: description,
+                status: status
+            }]);
+        } catch (e) {
+            console.error('History Log Error:', e.message);
+        }
+    }
+
+    // RENDER TIERS
     function renderTiers() {
         const grid = document.getElementById('tierGrid');
         const refWrap = document.getElementById('referralTiersWrap');
         const infoContent = document.getElementById('depositInfoContent');
         grid.innerHTML = ''; refWrap.innerHTML = ''; infoContent.innerHTML = '';
         
-        infoContent.innerHTML += `<div class="bg-brand-500/10 border border-brand-500/30 p-4 rounded-xl text-xs text-brand-400 mb-6">One-time Welcome Bonus is credited to your Withdrawable Balance immediately upon approval of your first deposit.</div>`;
+        infoContent.innerHTML += `<div class="bg-brand-500/10 border border-brand-500/30 p-4 rounded-xl text-xs text-brand-400 mb-6">One-time Welcome Bonus is credited to your Withdrawable Balance immediately upon approval of your first deposit. <br><br><strong>Note:</strong> Daily Yield is distributed Monday through Friday exclusively (No weekends).<br><br><strong>Maturation:</strong> Capital adheres strictly to a 31-day lock timeline.</div>`;
 
         TIER_CONFIG.forEach(t => {
-            // Main Deposit Grid Card
             grid.innerHTML += `
                 <div onclick="selectTier(this, ${t.deposit})" class="tier-card glass-card rounded-2xl p-4 text-center cursor-pointer transition hover:border-brand-500/50 hover:bg-slate-800 relative overflow-hidden" data-amount="${t.deposit}" data-tier="${t.tier}" id="tierCard-${t.tier}">
                     <div id="tier-status-badge-${t.tier}" class="absolute top-2 right-2 hidden"></div>
@@ -691,18 +716,16 @@
                     <div class="text-[10px] text-amber-400 mt-2">🎁 +₦${fmt(t.welcomeBonus)} Bonus</div>
                 </div>
             `;
-
-            // Referral Page Tier List
-            refWrap.innerHTML += `
-                <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-3 rounded-xl">
-                    <span class="text-xs text-slate-400">Tier ${t.tier} (${t.name})</span>
-                    <span class="text-sm font-bold text-amber-400">+₦${fmt(t.referralBonus)}</span>
-                </div>
-            `;
-
-            // Info Modal Tier List
+            if (!t.premium) {
+                refWrap.innerHTML += `
+                    <div class="flex justify-between items-center glass-card p-3 rounded-xl">
+                        <span class="text-xs text-slate-400">${t.name} (₦${fmt(t.deposit)})</span>
+                        <span class="text-sm font-bold text-amber-400">+₦${fmt(t.referralBonus)}</span>
+                    </div>
+                `;
+            }
             infoContent.innerHTML += `
-                <div class="bg-slate-800/50 border border-slate-700 p-4 rounded-xl">
+                <div class="glass-card p-4 rounded-xl">
                     <div class="flex justify-between mb-2">
                         <span class="font-bold text-white">${t.name} (₦${fmt(t.deposit)})</span>
                         <span class="font-bold text-brand-400">+₦${fmt(t.dailyInterest)}/day</span>
@@ -719,19 +742,10 @@
     }
 
     function selectTier(cardEl, amount) {
-        // Guard: block if locked (lower than active) or currently active
-        if (cardEl.dataset.tierState === 'active') {
-            showToast('⚡ This is your current active plan.');
-            return;
-        }
-        if (cardEl.dataset.tierState === 'locked') {
-            showToast('🔒 Cannot downgrade. Select a higher tier to upgrade.');
-            return;
-        }
+        if (cardEl.dataset.tierState === 'active') return showToast('⚡ This is your current active plan.');
+        if (cardEl.dataset.tierState === 'locked') return showToast('This tier is locked. Pick another tier above.');
 
-        document.querySelectorAll('.tier-card').forEach(c => {
-            c.classList.remove('border-brand-500', 'bg-brand-900/20');
-        });
+        document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('border-brand-500', 'bg-brand-900/20'));
         cardEl.classList.add('border-brand-500', 'bg-brand-900/20');
         selectedDepositAmount = amount;
 
@@ -747,48 +761,47 @@
         `;
     }
 
-    // Called from refreshUserData() — marks each tier card as active / locked / upgradeable
     function updateTierStates() {
         const lockedCapital = parseFloat(currentUser?.locked_capital || 0);
-        const activeTier = getTierByCapital(lockedCapital);
 
         TIER_CONFIG.forEach(t => {
             const card  = document.getElementById(`tierCard-${t.tier}`);
             const badge = document.getElementById(`tier-status-badge-${t.tier}`);
             if (!card || !badge) return;
 
-            // Reset
-            card.classList.remove('opacity-50', 'pointer-events-none', 'border-amber-500/60', 'bg-amber-500/5', 'border-brand-500/60', 'bg-brand-500/5');
+            card.classList.remove('opacity-50', 'grayscale', 'pointer-events-none', 'border-amber-500/60', 'bg-amber-500/5', 'border-brand-500/60', 'bg-brand-500/5');
             badge.className = 'absolute top-2 right-2';
             badge.innerHTML = '';
             delete card.dataset.tierState;
 
-            if (!activeTier) return; // No active plan — all tiers are selectable
-
-            if (t.deposit === activeTier.deposit) {
-                // This IS the active plan
-                card.dataset.tierState = 'active';
-                card.classList.add('border-amber-500/60', 'bg-amber-500/5');
-                badge.classList.remove('hidden');
-                badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full">Active</span>`;
-            } else if (t.deposit < activeTier.deposit) {
-                // Lower tier — locked (no downgrade)
+            if (t.deposit >= 50000) {
                 card.dataset.tierState = 'locked';
-                card.classList.add('opacity-50');
+                card.classList.add('opacity-50', 'grayscale', 'pointer-events-none');
                 badge.classList.remove('hidden');
-                badge.innerHTML = `<i class="ph-fill ph-lock text-slate-500 text-base"></i>`;
-            } else {
-                // Higher tier — upgrade available
-                card.dataset.tierState = 'upgrade';
-                badge.classList.remove('hidden');
-                badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-brand-500/20 text-brand-400 border border-brand-500/30 px-1.5 py-0.5 rounded-full">Upgrade</span>`;
+                badge.innerHTML = `<i class="ph-fill ph-lock-key text-red-400 text-base"></i>`;
+                return;
+            }
+
+            if (lockedCapital > 0) {
+                if (t.deposit === lockedCapital) {
+                    card.dataset.tierState = 'active';
+                    card.classList.add('border-amber-500/60', 'bg-amber-500/5');
+                    badge.classList.remove('hidden');
+                    badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full">Active</span>`;
+                } else if (t.deposit < lockedCapital) {
+                    card.dataset.tierState = 'locked';
+                    card.classList.add('opacity-50', 'grayscale', 'pointer-events-none');
+                    badge.classList.remove('hidden');
+                    badge.innerHTML = `<i class="ph-fill ph-lock text-slate-500 text-base"></i>`;
+                } else {
+                    card.dataset.tierState = 'upgrade';
+                    badge.classList.remove('hidden');
+                    badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-brand-500/20 text-brand-400 border border-brand-500/30 px-1.5 py-0.5 rounded-full">Upgrade</span>`;
+                }
             }
         });
     }
 
-    // ═══════════════════════════════════════════════════
-    // CORE UTILS
-    // ═══════════════════════════════════════════════════
     function showToast(msg) {
         const old = document.getElementById('customToast');
         if (old) old.remove();
@@ -847,28 +860,15 @@
         return eligible.length ? eligible[eligible.length - 1] : null;
     }
 
-    // ═══════════════════════════════════════════════════
-    // AUTHENTICATION LOGIC (FIXED)
-    // ═══════════════════════════════════════════════════
     async function handleLogin() {
         if (!supabase) return showToast('System initializing, please wait...');
-        
         const rawPhone = document.getElementById('loginPhone').value.trim();
         const pass = document.getElementById('loginPassword').value.trim();
-        
         if (!rawPhone || !pass) return showToast('Enter phone and password');
         
         toggleLoader(true, 'Authenticating...');
-        const phone = normalizePhone(rawPhone);
-
         try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('phone', phone)
-                .eq('password', pass)
-                .maybeSingle();
-
+            const { data, error } = await supabase.from('profiles').select('*').eq('phone', normalizePhone(rawPhone)).eq('password', pass).maybeSingle();
             if (error || !data) throw new Error('Invalid credentials');
 
             currentUser = data;
@@ -888,35 +888,37 @@
 
     async function processSignup() {
         if (!supabase) return showToast('System initializing...');
-        
         const rawPhone = document.getElementById('signupPhone').value.trim();
         const pass = document.getElementById('signupPassword').value.trim();
+        const region = document.getElementById('signupRegion').value;
         const ref = document.getElementById('signupReferral').value.trim();
 
-        if (!rawPhone || !pass) return showToast('Required fields missing');
+        if (!rawPhone || !pass || !region) return showToast('All fields including Region are required');
 
         toggleLoader(true, 'Creating Secure Account...');
-        const phone = normalizePhone(rawPhone);
-
         try {
+            const normalizedPhone = normalizePhone(rawPhone);
+            
+            const { data: existing } = await supabase.from('profiles').select('id').eq('phone', normalizedPhone).maybeSingle();
+            if (existing) {
+                toggleLoader(false);
+                return showToast('❌ Phone number already registered');
+            }
+
             const { error } = await supabase.from('profiles').insert([{
-                phone: phone,
+                phone: normalizedPhone,
                 password: pass,
+                region: region,
                 referred_by: ref || null
             }]);
 
-            if (error) {
-                if (error.code === '23505') throw new Error('Phone number already registered');
-                throw error;
-            }
+            if (error) throw error;
 
             showToast('✅ Account Created! Please login.');
             document.getElementById('loginPhone').value = rawPhone;
-            document.getElementById('signupPhone').value = '';
-            document.getElementById('signupPassword').value = '';
             switchAuthTab('login');
         } catch (err) {
-            showToast('❌ ' + err.message);
+            showToast('❌ ' + (err.message || 'Registration failed. Please try again.'));
         } finally {
             toggleLoader(false);
         }
@@ -930,11 +932,9 @@
         showToast('Logged out securely');
     }
 
-    // BIND EVENTS ON DOM LOAD
     document.addEventListener('DOMContentLoaded', async () => {
         renderTiers();
-        document.getElementById('btnLogin').addEventListener('click', handleLogin);
-        document.getElementById('btnSignup').addEventListener('click', processSignup);
+        initTelegramBtn();
 
         const cached = localStorage.getItem('currentUser');
         const rem    = localStorage.getItem('rememberpassword');
@@ -945,44 +945,32 @@
         }
 
         if (cached) {
-            // Show a lightweight splash while we re-verify the session
             toggleLoader(true, 'Restoring Session…');
             try {
                 const parsed = JSON.parse(cached);
-
-                // Re-validate: make sure the profile still exists & credentials still match
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', parsed.id)
-                    .maybeSingle();
-
+                const { data, error } = await supabase.from('profiles').select('*').eq('id', parsed.id).maybeSingle();
                 if (error || !data) throw new Error('Session invalid');
 
                 currentUser = data;
-                localStorage.setItem('currentUser', JSON.stringify(data)); // refresh cached copy
+                localStorage.setItem('currentUser', JSON.stringify(data));
                 toggleLoader(false);
                 showDashboard();
             } catch (e) {
-                // Session could not be verified — clear storage and force re-login
                 localStorage.removeItem('currentUser');
                 localStorage.removeItem('rememberpassword');
                 currentUser = null;
                 toggleLoader(false);
                 switchView('authPage');
-                showToast('Session expired. Please log in again.');
+                checkReferralLink();
             }
         } else {
-            // No cached session — show auth page (default state, already shown)
             switchView('authPage');
+            checkReferralLink();
         }
     });
 
-    // ═══════════════════════════════════════════════════
-    // NAVIGATION & VIEW MANAGER
-    // ═══════════════════════════════════════════════════
     const VIEWS = ['authPage', 'dashboardPage', 'depositPage', 'withdrawPage', 'bankSetupPage', 'referralPage', 'historyPage', 'adminPage'];
-
+    
     function switchView(targetId) {
         VIEWS.forEach(id => {
             const el = document.getElementById(id);
@@ -996,7 +984,6 @@
             nav.classList.add('hidden');
         } else {
             nav.classList.remove('hidden');
-            // Update Active Icon
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.target === targetId);
             });
@@ -1005,7 +992,12 @@
 
     function navigateTo(page) {
         if (!currentUser) return;
-        if (page !== 'bankSetupPage' && page !== 'dashboardPage' && (!currentUser.bank_name || !currentUser.account_number)) {
+        
+        if (page === 'adminPage' && currentUser.phone !== 'admin') {
+            return showToast('🔒 Unauthorized Access: Admin privileges required.');
+        }
+
+        if (page !== 'bankSetupPage' && page !== 'dashboardPage' && page !== 'adminPage' && (!currentUser.bank_name || !currentUser.account_number)) {
             showToast('⚠️ Bank details required first');
             switchView('bankSetupPage');
             return;
@@ -1014,7 +1006,6 @@
         if(page === 'historyPage') loadHistory();
         if(page === 'withdrawPage') prepareWithdrawalView();
         if(page === 'adminPage') loadAdminData();
-        
         switchView(page);
     }
 
@@ -1030,14 +1021,14 @@
         else navigateTo(page);
     }
 
-    // ═══════════════════════════════════════════════════
-    // DASHBOARD DATA
-    // ═══════════════════════════════════════════════════
     async function showDashboard() {
         switchView('dashboardPage');
-        if (currentUser.phone === 'admin') {
+        if (currentUser && currentUser.phone === 'admin') {
             document.getElementById('adminLaunchBtn').classList.remove('hidden');
             document.getElementById('adminLaunchBtn').classList.add('flex');
+        } else {
+            document.getElementById('adminLaunchBtn').classList.add('hidden');
+            document.getElementById('adminLaunchBtn').classList.remove('flex');
         }
         await refreshUserData();
     }
@@ -1047,7 +1038,6 @@
         try {
             const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
             if(error) throw error;
-            
             currentUser = data;
             localStorage.setItem('currentUser', JSON.stringify(data));
 
@@ -1055,7 +1045,6 @@
             document.getElementById('userBalance').textContent = `₦${fmt(data.balance || 0)}`;
             document.getElementById('lockedCapital').textContent = `₦${fmt(data.locked_capital || 0)}`;
             document.getElementById('totalIncome').textContent = `₦${fmt(data.total_income || 0)}`;
-            
             document.getElementById('userReferralCode').textContent = data.referral_code || 'N/A';
 
             const activeTier = getTierByCapital(data.locked_capital);
@@ -1075,22 +1064,72 @@
                 document.getElementById('savedBankName').textContent = data.bank_name;
                 document.getElementById('savedAccNumber').textContent = data.account_number;
                 document.getElementById('savedAccName').textContent = data.account_name;
-                
                 document.getElementById('bankNameInput').value = data.bank_name;
                 document.getElementById('bankAccNumberInput').value = data.account_number;
                 document.getElementById('bankAccNameInput').value = data.account_name;
             }
+            updateTierStates();
+        } catch(e) { console.error(e); }
+    }
 
-            updateTierStates(); // Reflect active/locked/upgrade state on deposit page
+    async function loadHistory() {
+        const feed = document.getElementById('historyFeed');
+        feed.innerHTML = '<div class="text-center text-slate-500 py-10 text-sm">Loading history...</div>';
+        try {
+            const { data, error } = await supabase.from('history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+            if (error) throw error;
+            if (!data || data.length === 0) {
+                feed.innerHTML = '<div class="text-center text-slate-500 py-10 text-sm">No transaction history.</div>';
+                return;
+            }
 
+            feed.innerHTML = data.map(tx => {
+                let icon = 'ph-clock';
+                let iconColor = 'text-slate-400';
+                let amountColor = 'text-slate-300';
+                let sign = '';
+
+                const isDeclined = tx.status === 'declined' || tx.description.toLowerCase().includes('declined');
+                const isPending = tx.status === 'pending' || tx.description.toLowerCase().includes('pending');
+
+                if (isDeclined) {
+                    icon = 'ph-x-circle'; iconColor = 'text-red-500'; amountColor = 'text-red-500 line-through opacity-70';
+                } else if (isPending) {
+                    icon = 'ph-hourglass'; iconColor = 'text-amber-500'; amountColor = 'text-amber-400'; sign = '~';
+                } else {
+                    if (tx.type === 'deposit') {
+                        icon = 'ph-arrow-circle-down'; iconColor = 'text-brand-400'; amountColor = 'text-brand-400'; sign = '+';
+                    } else if (tx.type === 'withdrawal') {
+                        icon = 'ph-arrow-circle-up'; iconColor = 'text-red-400'; amountColor = 'text-red-400'; sign = '-';
+                    } else if (tx.type === 'bonus' || tx.type === 'referral') {
+                        icon = 'ph-gift'; iconColor = 'text-amber-400'; amountColor = 'text-amber-400'; sign = '+';
+                    } else if (tx.type === 'yield') {
+                        icon = 'ph-trend-up'; iconColor = 'text-brand-400'; amountColor = 'text-brand-400'; sign = '+';
+                    } else if (tx.type === 'refund') {
+                        icon = 'ph-arrow-u-up-left'; iconColor = 'text-blue-400'; amountColor = 'text-blue-400'; sign = '+';
+                    }
+                }
+
+                return `
+                <div class="glass-card border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5"><i class="ph-fill ${icon} ${iconColor} text-2xl"></i></div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-300 uppercase tracking-widest">${tx.type} ${isPending ? '(Pending)' : ''}</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">${new Date(tx.created_at).toLocaleString()}</div>
+                            <div class="text-xs text-slate-400 mt-1 leading-relaxed pr-2">${tx.description}</div>
+                        </div>
+                    </div>
+                    <div class="text-base font-black ${amountColor} flex-shrink-0 ml-1">
+                        ${sign}₦${fmt(tx.amount)}
+                    </div>
+                </div>`;
+            }).join('');
         } catch(e) {
-            console.error(e);
+            feed.innerHTML = '<div class="text-center text-red-400 py-10 text-sm">Failed to load history.</div>';
         }
     }
 
-    // ═══════════════════════════════════════════════════
-    // FEATURE IMPLEMENTATIONS
-    // ═══════════════════════════════════════════════════
     async function saveBankDetails() {
         const b = document.getElementById('bankNameInput').value.trim();
         const a = document.getElementById('bankAccNumberInput').value.trim();
@@ -1124,6 +1163,18 @@
         const t = TIER_CONFIG.find(x => x.deposit === amt);
         document.getElementById('checkoutAmountDisplay').textContent = `₦${fmt(amt)}`;
         document.getElementById('checkoutTierDisplay').textContent = `${t.name} Plan`;
+
+        const userRegion = currentUser.region || 'North-Central';
+        const regionBanks = REGION_BANKS[userRegion] || REGION_BANKS['North-Central'];
+        const regionalBank = regionBanks[Math.floor(Math.random() * regionBanks.length)];
+
+        document.getElementById('checkoutBankName').textContent = regionalBank.bank;
+        document.getElementById('checkoutAccNum').textContent = regionalBank.account;
+        document.getElementById('checkoutAccName').textContent = regionalBank.name;
+
+        document.getElementById('checkoutRevealContainer').classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        document.getElementById('checkoutCopyBtn').classList.add('hidden');
+
         document.getElementById('checkoutPage').classList.remove('hidden');
         document.getElementById('checkoutPage').classList.add('flex');
         
@@ -1137,12 +1188,20 @@
             
             const ring = document.getElementById('checkoutTimerRing');
             if(checkoutSeconds < 60) ring.classList.add('border-red-500/50', 'shadow-[0_0_30px_rgba(239,68,68,0.3)]');
-            
             if(checkoutSeconds <= 0) {
                 cancelCheckout();
                 showToast('Session Expired');
             }
         }, 1000);
+    }
+
+    function revealCheckoutAcc() {
+        document.getElementById('checkoutRevealContainer').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('checkoutCopyBtn').classList.remove('hidden');
+        setTimeout(() => {
+            document.getElementById('checkoutRevealContainer').classList.add('hidden');
+        }, 300);
+        copyCheckoutAcc();
     }
 
     function cancelCheckout() {
@@ -1153,17 +1212,18 @@
     }
 
     function copyCheckoutAcc() {
-        navigator.clipboard.writeText('3153920748');
+        navigator.clipboard.writeText(document.getElementById('checkoutAccNum').textContent);
         showToast('Account copied!');
     }
 
     async function submitCheckoutPayment() {
         document.getElementById('checkoutSubmitBtn').disabled = true;
         toggleLoader(true, 'Verifying Transfer Node...');
-        
         setTimeout(async () => {
             try {
                 await supabase.from('deposits').insert([{ user_id: currentUser.id, amount: selectedDepositAmount, status: 'pending' }]);
+                await writeHistory(currentUser.id, `Deposit Pending — ₦${fmt(selectedDepositAmount)} transfer submitted for verification.`, 'deposit', selectedDepositAmount, 'pending');
+
                 cancelCheckout();
                 goBackToDashboard();
                 showToast('✅ Payment Submitted for Audit');
@@ -1181,8 +1241,14 @@
         document.getElementById('wAccName').textContent = currentUser.account_name;
         
         const tier = getTierByCapital(currentUser.locked_capital);
+        const isFriday = new Date().getDay() === 5;
+
         if(tier) {
-            document.getElementById('withdrawHintText').innerHTML = `Min. payout for ${tier.name} is <span class="text-white">₦${fmt(tier.minWithdrawal)}</span>.<br>Processing fee: ₦${fmt(tier.withdrawalFee)}/txn.`;
+            let paydayHint = isFriday ? 
+                `<span class="text-brand-400"><i class="ph-bold ph-check-circle"></i> It's Payday! You can withdraw all balances.</span>` : 
+                `<span class="text-amber-400"><i class="ph-bold ph-warning"></i> Today is not Friday. Only Welcome Bonuses are withdrawable today.</span>`;
+
+            document.getElementById('withdrawHintText').innerHTML = `Min. payout for ${tier.name} is <span class="text-white">₦${fmt(tier.minWithdrawal)}</span>.<br>Processing fee: ₦${fmt(tier.withdrawalFee)}/txn.<br><div class="mt-2 pt-2 border-t border-slate-700/50 font-medium">${paydayHint}</div>`;
             document.getElementById('withdrawHint').classList.remove('hidden');
         }
     }
@@ -1191,17 +1257,13 @@
         const val = parseFloat(document.getElementById('withdrawAmount').value);
         const tier = getTierByCapital(currentUser.locked_capital);
         const feeBox = document.getElementById('withdrawFeeSummary');
-        
         if(!val || !tier) { feeBox.classList.add('hidden'); return; }
-        
         const net = val - tier.withdrawalFee;
         feeBox.classList.remove('hidden');
         feeBox.innerHTML = `<strong>Fee:</strong> ₦${fmt(tier.withdrawalFee)} | <strong>Net Payout: <span class="text-white">₦${fmt(net)}</span></strong>`;
     }
 
     async function requestWithdrawal() {
-        if(new Date().getDay() !== 5) return showToast('🚫 Payouts occur only on bi-weekly Fridays.');
-        
         const amount = parseFloat(document.getElementById('withdrawAmount').value);
         const tier = getTierByCapital(currentUser.locked_capital);
         if(!amount || !tier) return;
@@ -1209,169 +1271,44 @@
         if(amount < tier.minWithdrawal) return showToast(`Min withdrawal is ₦${fmt(tier.minWithdrawal)}`);
         if(amount > parseFloat(currentUser.balance)) return showToast('Insufficient Available Balance');
 
+        let totalWelcomeBonus = 0;
+        try {
+            const { data: hist } = await supabase.from('history').select('amount').eq('user_id', currentUser.id).eq('type', 'bonus').eq('status', 'confirmed');
+            if (hist) totalWelcomeBonus = hist.reduce((sum, record) => sum + parseFloat(record.amount), 0);
+        } catch (e) { console.error('Error fetching history bounds', e); }
+
+        const nonWelcomeIncome = Math.max(0, parseFloat(currentUser.total_income || 0) - totalWelcomeBonus);
+        const availableWelcomeBonus = Math.max(0, parseFloat(currentUser.balance || 0) - nonWelcomeIncome);
+        const isFriday = new Date().getDay() === 5;
+
+        if (!isFriday) {
+            if (amount > availableWelcomeBonus) {
+                return showToast(`🚫 Yields unlock on Fridays. You can only withdraw your Welcome Bonus today (Up to ₦${fmt(availableWelcomeBonus)}).`);
+            }
+        }
+
         toggleLoader(true);
         try {
+            const newBal = parseFloat(currentUser.balance) - amount;
+            await supabase.from('profiles').update({ balance: newBal }).eq('id', currentUser.id);
+
             await supabase.from('withdrawals').insert([{
                 user_id: currentUser.id, amount: amount,
                 bank_name: currentUser.bank_name, account_number: currentUser.account_number, account_name: currentUser.account_name,
                 status: 'pending'
             }]);
-            showToast('✅ Payout Request Logged');
+
+            await writeHistory(currentUser.id, `Withdrawal Requested — ₦${fmt(amount)} submitted for clearance review.`, 'withdrawal', amount, 'pending');
+
+            currentUser.balance = newBal;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            await refreshUserData();
+
+            showToast('✅ Payout Request Logged & Balance Deducted');
             document.getElementById('withdrawAmount').value = '';
             goBackToDashboard();
         } catch(e) { showToast('Error requesting'); }
         toggleLoader(false);
-    }
-
-    // ── History helpers ──────────────────────────────────────────────────────
-    const TX_META = {
-        deposit:    { label: 'Deposit',        icon: 'ph-arrow-circle-down',  colorClass: 'text-amber-400',  bgClass: 'bg-amber-500/10 border-amber-500/20',  iconBg: 'bg-amber-500/20',  sign: '',  isCredit: false, isDebit: false },
-        withdrawal: { label: 'Withdrawal',     icon: 'ph-arrow-circle-up',    colorClass: 'text-red-400',    bgClass: 'bg-red-500/10  border-red-500/20',    iconBg: 'bg-red-500/20',    sign: '-', isCredit: false, isDebit: true  },
-        reward:     { label: 'Daily Reward',   icon: 'ph-trend-up',           colorClass: 'text-brand-400',  bgClass: 'bg-brand-500/10 border-brand-500/20', iconBg: 'bg-brand-500/20',  sign: '+', isCredit: true,  isDebit: false },
-        yield:      { label: 'Daily Yield',    icon: 'ph-trend-up',           colorClass: 'text-brand-400',  bgClass: 'bg-brand-500/10 border-brand-500/20', iconBg: 'bg-brand-500/20',  sign: '+', isCredit: true,  isDebit: false },
-        referral:   { label: 'Referral Bonus', icon: 'ph-users-three',        colorClass: 'text-purple-400', bgClass: 'bg-purple-500/10 border-purple-500/20',iconBg: 'bg-purple-500/20', sign: '+', isCredit: true,  isDebit: false },
-    };
-
-    function getTxMeta(type) {
-        return TX_META[type] || { label: type, icon: 'ph-dots-three-circle', colorClass: 'text-slate-300', bgClass: 'bg-slate-800/50 border-slate-700', iconBg: 'bg-slate-700', sign: '', isCredit: false, isDebit: false };
-    }
-
-    function formatTxDate(iso) {
-        if (!iso) return '—';
-        const d = new Date(iso);
-        return d.toLocaleString('en-NG', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
-    }
-
-    function buildTxCard(item) {
-        const m = getTxMeta(item.type);
-        const amtStr = `${m.sign}₦${fmt(Number(item.amount || 0))}`;
-        const desc = item.description || item.note || '—';
-        const statusBadge = item.status ? `<span class="ml-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${item.status === 'confirmed' || item.status === 'approved' ? 'bg-brand-500/20 text-brand-400' : 'bg-amber-500/20 text-amber-400'}">${item.status}</span>` : '';
-        return `
-        <div class="glass-card ${m.bgClass} rounded-2xl p-4 flex items-start gap-3">
-            <div class="w-10 h-10 rounded-full ${m.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i class="ph-fill ${m.icon} text-xl ${m.colorClass}"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span class="text-xs font-bold uppercase tracking-widest ${m.colorClass}">${m.label}</span>
-                        ${statusBadge}
-                    </div>
-                    <span class="text-base font-extrabold ${m.colorClass} ml-2 whitespace-nowrap">${amtStr}</span>
-                </div>
-                <div class="text-xs text-slate-300 mt-1 leading-snug truncate">${desc}</div>
-                <div class="text-[10px] text-slate-500 mt-1.5 font-medium">${formatTxDate(item.created_at)}</div>
-            </div>
-        </div>`;
-    }
-
-    async function loadHistory() {
-        const feed = document.getElementById('historyFeed');
-        feed.innerHTML = `
-            <div class="flex items-center justify-center gap-3 py-12 text-slate-500">
-                <div class="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-                <span class="text-sm">Fetching secure logs…</span>
-            </div>`;
-
-        try {
-            // Fetch all transaction types in parallel from their respective tables
-            const uid = currentUser.id;
-            const [histRes, depRes, wdRes] = await Promise.all([
-                supabase.from('history').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(40),
-                supabase.from('deposits').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(20),
-                supabase.from('withdrawals').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(20),
-            ]);
-
-            // Merge all records, tagging with source type where needed
-            let allTx = [];
-
-            if (histRes.data?.length) {
-                allTx.push(...histRes.data);   // already has .type field
-            }
-            if (depRes.data?.length) {
-                // Avoid double-counting if deposits already appear in history table
-                const histIds = new Set((histRes.data || []).filter(h => h.type === 'deposit').map(h => h.ref_id || h.id));
-                depRes.data.forEach(d => {
-                    if (!histIds.has(d.id)) {
-                        allTx.push({ ...d, type: 'deposit', description: `₦${fmt(Number(d.amount))} deposit — ${d.status || 'pending'}` });
-                    }
-                });
-            }
-            if (wdRes.data?.length) {
-                const histIds = new Set((histRes.data || []).filter(h => h.type === 'withdrawal').map(h => h.ref_id || h.id));
-                wdRes.data.forEach(w => {
-                    if (!histIds.has(w.id)) {
-                        allTx.push({ ...w, type: 'withdrawal', description: `Payout to ${w.bank_name || 'bank'} · ${w.account_number || ''}` });
-                    }
-                });
-            }
-
-            // Sort all by date descending
-            allTx.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-            if (!allTx.length) {
-                feed.innerHTML = `
-                    <div class="glass-card p-10 rounded-2xl text-center flex flex-col items-center gap-3">
-                        <i class="ph-fill ph-receipt text-4xl text-slate-600"></i>
-                        <div class="text-slate-500 text-sm">No transactions yet.<br>Your activity will appear here.</div>
-                    </div>`;
-                return;
-            }
-
-            // Build filter tabs
-            const types = [...new Set(allTx.map(t => t.type))];
-            const tabsHtml = `
-                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1 mb-4">
-                    <button onclick="filterHistory(this,'all')" data-filter="all" class="hist-tab flex-shrink-0 text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30 active-tab">All</button>
-                    ${types.map(type => {
-                        const m = getTxMeta(type);
-                        return `<button onclick="filterHistory(this,'${type}')" data-filter="${type}" class="hist-tab flex-shrink-0 text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">${m.label}</button>`;
-                    }).join('')}
-                </div>`;
-
-            // Summary strip
-            const credits = allTx.filter(t => getTxMeta(t.type).isCredit).reduce((s, t) => s + Number(t.amount || 0), 0);
-            const debits  = allTx.filter(t => getTxMeta(t.type).isDebit).reduce((s, t) => s + Number(t.amount || 0), 0);
-            const summaryHtml = `
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="glass-card bg-brand-500/5 border-brand-500/20 p-3 rounded-xl text-center">
-                        <div class="text-[9px] font-bold tracking-widest text-slate-500 uppercase mb-1">Total Credits</div>
-                        <div class="text-sm font-extrabold text-brand-400">+₦${fmt(credits)}</div>
-                    </div>
-                    <div class="glass-card bg-red-500/5 border-red-500/20 p-3 rounded-xl text-center">
-                        <div class="text-[9px] font-bold tracking-widest text-slate-500 uppercase mb-1">Total Debits</div>
-                        <div class="text-sm font-extrabold text-red-400">-₦${fmt(debits)}</div>
-                    </div>
-                </div>`;
-
-            feed.innerHTML = tabsHtml + summaryHtml + `<div id="historyCards">${allTx.map(buildTxCard).join('')}</div>`;
-
-            // Store for filtering
-            window._historyData = allTx;
-
-        } catch(e) {
-            console.error(e);
-            feed.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center text-red-400 text-sm flex flex-col items-center gap-2">
-                <i class="ph-fill ph-warning-circle text-3xl"></i>
-                <span>Failed to load transaction log.<br>Please try again.</span>
-            </div>`;
-        }
-    }
-
-    function filterHistory(btn, filterType) {
-        document.querySelectorAll('.hist-tab').forEach(b => {
-            b.classList.remove('bg-brand-500/20', 'text-brand-400', 'border-brand-500/30', 'active-tab');
-            b.classList.add('bg-slate-800', 'text-slate-400', 'border-slate-700');
-        });
-        btn.classList.add('bg-brand-500/20', 'text-brand-400', 'border-brand-500/30', 'active-tab');
-        btn.classList.remove('bg-slate-800', 'text-slate-400', 'border-slate-700');
-
-        const data = window._historyData || [];
-        const filtered = filterType === 'all' ? data : data.filter(t => t.type === filterType);
-        document.getElementById('historyCards').innerHTML = filtered.length
-            ? filtered.map(buildTxCard).join('')
-            : `<div class="text-center text-slate-500 py-8 text-sm">No ${filterType} records found.</div>`;
     }
 
     function copyCode(isLink) {
@@ -1381,9 +1318,15 @@
         showToast(isLink ? '🔗 Link Copied' : '📋 Code Copied');
     }
 
-    // ═══════════════════════════════════════════════════
-    // ADMIN FUNCTIONS — Full Implementation
-    // ═══════════════════════════════════════════════════
+    function checkReferralLink() {
+        const params = new URLSearchParams(window.location.search);
+        const refCode = params.get('ref');
+        if (refCode) {
+            switchAuthTab('signup');
+            document.getElementById('signupReferral').value = refCode;
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
 
     function switchAdminTab(tab) {
         const isDeposit = tab === 'deposits';
@@ -1393,677 +1336,333 @@
         const tabDep = document.getElementById('adminTabDep');
         const tabWd  = document.getElementById('adminTabWd');
         if (isDeposit) {
-            tabDep.classList.add('bg-slate-800','text-white','shadow-md');
-            tabDep.classList.remove('text-slate-400');
-            tabWd.classList.remove('bg-slate-800','text-white','shadow-md');
-            tabWd.classList.add('text-slate-400');
+            tabDep.classList.add('bg-slate-800','text-white','shadow-md'); tabDep.classList.remove('text-slate-400');
+            tabWd.classList.remove('bg-slate-800','text-white','shadow-md'); tabWd.classList.add('text-slate-400');
         } else {
-            tabWd.classList.add('bg-slate-800','text-white','shadow-md');
-            tabWd.classList.remove('text-slate-400');
-            tabDep.classList.remove('bg-slate-800','text-white','shadow-md');
-            tabDep.classList.add('text-slate-400');
+            tabWd.classList.add('bg-slate-800','text-white','shadow-md'); tabWd.classList.remove('text-slate-400');
+            tabDep.classList.remove('bg-slate-800','text-white','shadow-md'); tabDep.classList.add('text-slate-400');
         }
     }
 
     async function loadAdminData() {
-        checkDistributionStatus(); // check lock state every time admin panel opens
-        document.getElementById('pendingDeposits').innerHTML   = '<div class="text-center text-slate-500 text-xs py-6 flex items-center justify-center gap-2"><div class="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div> Loading…</div>';
-        document.getElementById('pendingWithdrawals').innerHTML = '<div class="text-center text-slate-500 text-xs py-6 flex items-center justify-center gap-2"><div class="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div> Loading…</div>';
+        document.getElementById('pendingDeposits').innerHTML = '<div class="text-center text-slate-500 py-6">Loading…</div>';
+        document.getElementById('pendingWithdrawals').innerHTML = '<div class="text-center text-slate-500 py-6">Loading…</div>';
+
+        const filterRegion = document.getElementById('adminRegionFilter').value;
 
         try {
             const [depRes, wdRes] = await Promise.all([
-                supabase.from('deposits').select('*, profiles(phone, bank_name, account_number, account_name, locked_capital)').eq('status', 'pending').order('created_at', { ascending: false }),
-                supabase.from('withdrawals').select('*, profiles(phone)').eq('status', 'pending').order('created_at', { ascending: false }),
+                supabase.from('deposits').select('*, profiles(phone, region, locked_capital, bank_name, account_number, account_name)').eq('status', 'pending').order('created_at', { ascending: false }),
+                supabase.from('withdrawals').select('*, profiles(phone, region)').eq('status', 'pending').order('created_at', { ascending: false }),
             ]);
 
-            // ── Deposits ────────────────────────────────────────────────
-            const deps = depRes.data || [];
-            const depCount = document.getElementById('adminDepCount');
-            depCount.textContent = deps.length;
-            depCount.classList.toggle('hidden', deps.length === 0);
+            let deps = depRes.data || [];
+            let wds = wdRes.data || [];
 
+            if (filterRegion !== 'All') {
+                deps = deps.filter(d => (d.profiles?.region || '') === filterRegion);
+                wds = wds.filter(w => (w.profiles?.region || '') === filterRegion);
+            }
+
+            document.getElementById('adminDepCount').textContent = deps.length;
+            document.getElementById('adminDepCount').classList.toggle('hidden', deps.length === 0);
+            
             if (!deps.length) {
-                document.getElementById('pendingDeposits').innerHTML = `
-                    <div class="glass-card rounded-2xl p-6 text-center flex flex-col items-center gap-2 text-slate-500 text-xs">
-                        <i class="ph-fill ph-check-circle text-brand-500/50 text-3xl"></i>
-                        No pending deposits. All clear!
-                    </div>`;
+                document.getElementById('pendingDeposits').innerHTML = `<div class="glass-card p-6 text-center text-slate-500 text-xs">No pending deposits.</div>`;
             } else {
                 document.getElementById('pendingDeposits').innerHTML = deps.map(dep => {
-                    const tier = TIER_CONFIG.find(t => t.deposit === Number(dep.amount));
-                    const phone = dep.profiles?.phone || dep.user_id.slice(0,8) + '…';
-                    const dateStr = new Date(dep.created_at).toLocaleString('en-NG', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true });
                     return `
-                    <div class="glass-card border-amber-500/20 bg-amber-500/5 rounded-2xl p-4" id="depCard-${dep.id}">
+                    <div class="glass-card border-amber-500/20 rounded-2xl p-4" id="depCard-${dep.id}">
                         <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <div class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                                    <i class="ph-fill ph-arrow-circle-down"></i> Deposit Request
-                                </div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">${dateStr}</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-lg font-extrabold text-white">₦${fmt(Number(dep.amount))}</div>
-                                <div class="text-[10px] font-bold text-amber-400 uppercase tracking-widest">${tier ? tier.name + ' Plan' : 'Custom'}</div>
-                            </div>
+                            <div><div class="text-xs font-bold text-amber-400"><i class="ph-fill ph-arrow-circle-down"></i> Deposit</div><div class="text-[10px] text-slate-500 mt-0.5">${dep.profiles?.region || 'Unknown Region'}</div></div>
+                            <div class="text-right"><div class="text-lg font-extrabold text-white">₦${fmt(Number(dep.amount))}</div></div>
                         </div>
-                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300 space-y-1">
-                            <div class="flex justify-between"><span class="text-slate-500">User</span><span class="font-mono">${phone}</span></div>
-                            ${tier ? `
-                            <div class="flex justify-between"><span class="text-slate-500">Daily Yield</span><span class="text-brand-400 font-bold">+₦${fmt(tier.dailyInterest)}/day</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Welcome Bonus</span><span class="text-amber-400 font-bold">+₦${fmt(tier.welcomeBonus)}</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Referral Bonus</span><span class="text-purple-400 font-bold">+₦${fmt(tier.referralBonus)} to referrer</span></div>
-                            ` : ''}
+                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300">
+                            <div class="flex justify-between"><span>User:</span><span class="font-mono">${dep.profiles?.phone || '...'}</span></div>
+                            <div class="flex justify-between"><span>Bank:</span><span>${dep.profiles?.bank_name || '—'}</span></div>
+                            <div class="flex justify-between"><span>Acct No:</span><span class="font-mono font-bold text-white">${dep.profiles?.account_number || '—'}</span></div>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="approveDeposit('${dep.id}','${dep.user_id}',${dep.amount})" class="flex-1 bg-brand-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 hover:bg-brand-400 transition active:scale-95">
-                                <i class="ph-bold ph-check text-sm"></i> Approve
-                            </button>
-                            <button onclick="declineDeposit('${dep.id}')" class="flex-1 bg-red-500/20 border border-red-500/30 text-red-400 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 hover:bg-red-500/30 transition active:scale-95">
-                                <i class="ph-bold ph-x text-sm"></i> Decline
-                            </button>
+                            <button onclick="approveDeposit('${dep.id}','${dep.user_id}',${dep.amount})" class="flex-1 bg-brand-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs hover:bg-brand-400">Approve</button>
+                            <button onclick="declineDeposit('${dep.id}','${dep.user_id}',${dep.amount})" class="flex-1 bg-red-500/20 text-red-400 font-bold py-2.5 rounded-xl text-xs hover:bg-red-500/30">Decline</button>
                         </div>
                     </div>`;
                 }).join('');
             }
 
-            // ── Withdrawals ──────────────────────────────────────────────
-            const wds = wdRes.data || [];
-            const wdCount = document.getElementById('adminWdCount');
-            wdCount.textContent = wds.length;
-            wdCount.classList.toggle('hidden', wds.length === 0);
-
+            document.getElementById('adminWdCount').textContent = wds.length;
+            document.getElementById('adminWdCount').classList.toggle('hidden', wds.length === 0);
+            
             if (!wds.length) {
-                document.getElementById('pendingWithdrawals').innerHTML = `
-                    <div class="glass-card rounded-2xl p-6 text-center flex flex-col items-center gap-2 text-slate-500 text-xs">
-                        <i class="ph-fill ph-check-circle text-brand-500/50 text-3xl"></i>
-                        No pending withdrawals. All clear!
-                    </div>`;
+                document.getElementById('pendingWithdrawals').innerHTML = `<div class="glass-card p-6 text-center text-slate-500 text-xs">No pending withdrawals.</div>`;
             } else {
                 document.getElementById('pendingWithdrawals').innerHTML = wds.map(wd => {
-                    const phone  = wd.profiles?.phone || wd.user_id.slice(0,8) + '…';
-                    const dateStr = new Date(wd.created_at).toLocaleString('en-NG', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true });
                     return `
-                    <div class="glass-card border-red-500/20 bg-red-500/5 rounded-2xl p-4" id="wdCard-${wd.id}">
+                    <div class="glass-card border-red-500/20 rounded-2xl p-4" id="wdCard-${wd.id}">
                         <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <div class="text-xs font-bold text-red-400 flex items-center gap-1.5">
-                                    <i class="ph-fill ph-arrow-circle-up"></i> Withdrawal Request
-                                </div>
-                                <div class="text-[10px] text-slate-500 mt-0.5">${dateStr}</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-lg font-extrabold text-white">₦${fmt(Number(wd.amount))}</div>
-                            </div>
+                            <div><div class="text-xs font-bold text-red-400"><i class="ph-fill ph-arrow-circle-up"></i> Withdrawal</div><div class="text-[10px] text-slate-500 mt-0.5">${wd.profiles?.region || 'Unknown Region'}</div></div>
+                            <div class="text-right"><div class="text-lg font-extrabold text-white">₦${fmt(Number(wd.amount))}</div></div>
                         </div>
-                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300 space-y-1">
-                            <div class="flex justify-between"><span class="text-slate-500">User</span><span class="font-mono">${phone}</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Bank</span><span>${wd.bank_name || '—'}</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Account No.</span><span class="font-mono font-bold text-white">${wd.account_number || '—'}</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Account Name</span><span>${wd.account_name || '—'}</span></div>
+                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300">
+                            <div class="flex justify-between"><span>Bank:</span><span>${wd.bank_name || '—'}</span></div>
+                            <div class="flex justify-between"><span>Acct No:</span><span class="font-mono font-bold text-white">${wd.account_number || '—'}</span></div>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="approveWithdrawal('${wd.id}','${wd.user_id}',${wd.amount})" class="flex-1 bg-brand-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 hover:bg-brand-400 transition active:scale-95">
-                                <i class="ph-bold ph-check text-sm"></i> Approve & Pay
-                            </button>
-                            <button onclick="declineWithdrawal('${wd.id}')" class="flex-1 bg-red-500/20 border border-red-500/30 text-red-400 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 hover:bg-red-500/30 transition active:scale-95">
-                                <i class="ph-bold ph-x text-sm"></i> Decline
-                            </button>
+                            <button onclick="approveWithdrawal('${wd.id}','${wd.user_id}',${wd.amount})" class="flex-1 bg-brand-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs hover:bg-brand-400">Approve</button>
+                            <button onclick="declineWithdrawal('${wd.id}','${wd.user_id}',${wd.amount})" class="flex-1 bg-red-500/20 text-red-400 font-bold py-2.5 rounded-xl text-xs hover:bg-red-500/30">Decline (Refund)</button>
                         </div>
                     </div>`;
                 }).join('');
             }
-
-        } catch(e) {
-            console.error(e);
-            const msg = `<div class="text-red-400 text-xs text-center py-4">Failed to load. Check console.</div>`;
-            document.getElementById('pendingDeposits').innerHTML = msg;
-            document.getElementById('pendingWithdrawals').innerHTML = msg;
-        }
+        } catch(e) { console.error(e); }
     }
 
-    // ── APPROVE DEPOSIT ───────────────────────────────────────────────────────
-    async function approveDeposit(depositId, userId, amount) {
-        const amt   = Number(amount);
-        const tier  = TIER_CONFIG.find(t => t.deposit === amt);
-        if (!tier) return showToast('❌ Tier not found for this amount');
-
-        toggleLoader(true, 'Approving Deposit…');
-        try {
-            // 1. Fetch current user profile
-            const { data: profile, error: pErr } = await supabase.from('profiles').select('*').eq('id', userId).single();
-            if (pErr || !profile) throw new Error('User not found');
-
-            const currentBalance  = parseFloat(profile.balance || 0);
-            const currentIncome   = parseFloat(profile.total_income || 0);
-            const currentLocked   = parseFloat(profile.locked_capital || 0);
-
-            const newBalance = currentBalance + tier.welcomeBonus;
-            const newIncome  = currentIncome  + tier.welcomeBonus;
-            const newLocked  = Math.max(currentLocked, amt);   // never downgrade locked
-
-            // 2. Update user profile: lock capital + credit welcome bonus
-            const { error: uErr } = await supabase.from('profiles').update({
-                locked_capital: newLocked,
-                balance:        newBalance,
-                total_income:   newIncome,
-            }).eq('id', userId);
-            if (uErr) throw uErr;
-
-            // 3. Mark deposit as confirmed
-            await supabase.from('deposits').update({ status: 'confirmed' }).eq('id', depositId);
-
-            // 4. Write deposit history record
-            await supabase.from('history').insert([{
-                user_id:     userId,
-                type:        'deposit',
-                amount:      amt,
-                description: `${tier.name} Plan deposit confirmed (₦${fmt(amt)})`,
-                status:      'confirmed',
-            }]);
-
-            // 5. Write welcome bonus history record
-            await supabase.from('history').insert([{
-                user_id:     userId,
-                type:        'reward',
-                amount:      tier.welcomeBonus,
-                description: `Welcome bonus — ${tier.name} Plan`,
-                status:      'confirmed',
-            }]);
-
-            // 6. If user was referred, credit referral bonus to referrer
-            if (profile.referred_by) {
-                const { data: referrer } = await supabase.from('profiles').select('*').eq('referral_code', profile.referred_by).maybeSingle();
-                if (referrer) {
-                    await supabase.from('profiles').update({
-                        balance:      parseFloat(referrer.balance || 0) + tier.referralBonus,
-                        total_income: parseFloat(referrer.total_income || 0) + tier.referralBonus,
-                    }).eq('id', referrer.id);
-                    await supabase.from('history').insert([{
-                        user_id:     referrer.id,
-                        type:        'referral',
-                        amount:      tier.referralBonus,
-                        description: `Referral bonus — ${tier.name} Plan signup`,
-                        status:      'confirmed',
-                    }]);
-                }
-            }
-
-            // 7. Remove card from UI
-            const card = document.getElementById(`depCard-${depositId}`);
-            if (card) { card.style.transition='all 0.3s'; card.style.opacity='0'; card.style.height='0'; card.style.padding='0'; card.style.margin='0'; setTimeout(()=>card.remove(),300); }
-
-            showToast(`✅ Deposit approved — ₦${fmt(tier.welcomeBonus)} welcome bonus sent`);
-        } catch(e) {
-            console.error(e);
-            showToast('❌ Approval failed: ' + e.message);
-        }
-        toggleLoader(false);
-    }
-
-    // ── DECLINE DEPOSIT ───────────────────────────────────────────────────────
-    async function declineDeposit(depositId) {
-        toggleLoader(true, 'Declining Deposit…');
-        try {
-            await supabase.from('deposits').update({ status: 'declined' }).eq('id', depositId);
-            const card = document.getElementById(`depCard-${depositId}`);
-            if (card) { card.style.transition='all 0.3s'; card.style.opacity='0'; card.style.height='0'; card.style.padding='0'; card.style.margin='0'; setTimeout(()=>card.remove(),300); }
-            showToast('🚫 Deposit declined');
-        } catch(e) { showToast('❌ Error: ' + e.message); }
-        toggleLoader(false);
-    }
-
-    // ── APPROVE WITHDRAWAL ────────────────────────────────────────────────────
-    async function approveWithdrawal(withdrawalId, userId, amount) {
-        const amt = Number(amount);
-        toggleLoader(true, 'Approving Withdrawal…');
-        try {
-            // 1. Deduct from user balance
-            const { data: profile, error: pErr } = await supabase.from('profiles').select('balance').eq('id', userId).single();
-            if (pErr || !profile) throw new Error('User not found');
-
-            const newBalance = Math.max(0, parseFloat(profile.balance || 0) - amt);
-
-            await supabase.from('profiles').update({ balance: newBalance }).eq('id', userId);
-
-            // 2. Mark withdrawal confirmed
-            await supabase.from('withdrawals').update({ status: 'confirmed' }).eq('id', withdrawalId);
-
-            // 3. Write history record
-            await supabase.from('history').insert([{
-                user_id:     userId,
-                type:        'withdrawal',
-                amount:      amt,
-                description: `Payout of ₦${fmt(amt)} approved and processed`,
-                status:      'confirmed',
-            }]);
-
-            // 4. Remove card from UI
-            const card = document.getElementById(`wdCard-${withdrawalId}`);
-            if (card) { card.style.transition='all 0.3s'; card.style.opacity='0'; card.style.height='0'; card.style.padding='0'; card.style.margin='0'; setTimeout(()=>card.remove(),300); }
-
-            showToast(`✅ Withdrawal approved — ₦${fmt(amt)} paid out`);
-        } catch(e) {
-            console.error(e);
-            showToast('❌ Approval failed: ' + e.message);
-        }
-        toggleLoader(false);
-    }
-
-    // ── DECLINE WITHDRAWAL ────────────────────────────────────────────────────
-    async function declineWithdrawal(withdrawalId) {
-        toggleLoader(true, 'Declining Withdrawal…');
-        try {
-            await supabase.from('withdrawals').update({ status: 'declined' }).eq('id', withdrawalId);
-            const card = document.getElementById(`wdCard-${withdrawalId}`);
-            if (card) { card.style.transition='all 0.3s'; card.style.opacity='0'; card.style.height='0'; card.style.padding='0'; card.style.margin='0'; setTimeout(()=>card.remove(),300); }
-            showToast('🚫 Withdrawal declined');
-        } catch(e) { showToast('❌ Error: ' + e.message); }
-        toggleLoader(false);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // DISTRIBUTION LOCK — 100% SERVER-SIDE via system_control table
-    //
-    // All date comparisons use values returned by the DB (get_server_date RPC).
-    // No browser date (new Date / Date.now) is used for any gate decision.
-    // The countdown display is the only place browser time is used, and only
-    // to tick seconds — the server date resets the gate, not the browser.
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    let _countdownInterval = null;
-
-    // ── UI helpers ────────────────────────────────────────────────────────────────────────────
-    function setDistributeBtn(state, label) {
-        const btn = document.getElementById('distributeBtn');
-        if (!btn) return;
-        const base = 'w-full h-12 rounded-full flex items-center justify-center gap-2 text-sm font-bold transition-all';
-        btn.disabled = state !== 'ready';
-        btn.onclick  = state === 'ready' ? distributeGlobalInterest : null;
-        if (state === 'ready') {
-            btn.className = `glow-btn ${base}`;
-            btn.innerHTML = `<i class="ph-bold ph-play-circle text-lg"></i> ${label}`;
-        } else {
-            btn.className = `${base} bg-slate-800 text-slate-500 cursor-not-allowed opacity-60 border border-slate-700`;
-            btn.innerHTML = label;
-        }
-    }
-
-    function showLockStrip(type, html) {
-        const strip = document.getElementById('yieldLockStrip');
-        if (!strip) return;
-        const themes = {
-            ready:   'bg-brand-500/10 border border-brand-500/20 text-brand-400',
-            locked:  'bg-slate-800/60 border border-slate-700 text-slate-300',
-            weekend: 'bg-amber-500/10 border border-amber-500/20 text-amber-400/90',
-            error:   'bg-red-500/10 border border-red-500/20 text-red-400',
-        };
-        strip.className = `rounded-xl p-3 mb-4 text-xs leading-relaxed ${themes[type] || themes.error}`;
-        strip.innerHTML = html;
-        strip.classList.remove('hidden');
-    }
-
-    function startCountdown(onExpire) {
-        clearInterval(_countdownInterval);
-        const cdWrap = document.getElementById('yieldCountdownWrap');
-        if (cdWrap) cdWrap.classList.remove('hidden');
-        const now      = new Date();
-        const midnight = new Date(now);
-        midnight.setDate(midnight.getDate() + 1);
-        midnight.setHours(0, 0, 0, 0);
-        const msLeft = midnight - now;
-        const anchor = Date.now();
-        _countdownInterval = setInterval(() => {
-            const diff = msLeft - (Date.now() - anchor);
-            if (diff <= 0) {
-                clearInterval(_countdownInterval);
-                const cdEl = document.getElementById('yieldCountdown');
-                if (cdEl) cdEl.textContent = '00:00:00';
-                if (cdWrap) cdWrap.classList.add('hidden');
-                onExpire();
-                return;
-            }
-            const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
-            const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-            const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-            const cdEl = document.getElementById('yieldCountdown');
-            if (cdEl) cdEl.textContent = `${h}:${m}:${s}`;
-        }, 1000);
-    }
-
-    // ── CHECK DISTRIBUTION STATUS (called on admin panel open) ────────────────────
-    // Reads profiles table directly — no system_control or RPC needed.
-    async function checkDistributionStatus() {
-        const cdWrap = document.getElementById('yieldCountdownWrap');
-        setDistributeBtn('checking', `<i class="ph-bold ph-spinner-gap animate-spin text-lg"></i> Checking status…`);
-        if (cdWrap) cdWrap.classList.add('hidden');
-        clearInterval(_countdownInterval);
-
-        const todayDow = new Date().getDay();
-        const todayStr = new Date().toLocaleDateString('sv-SE');
-        const isWeekend = todayDow === 0 || todayDow === 6;
-
-        if (isWeekend) {
-            showLockStrip('weekend',
-                `<i class="ph-fill ph-moon mr-1"></i>
-                 <strong>Market closed.</strong> Daily yields run Monday–Friday only.
-                 Distribution resumes on Monday.`
-            );
-            setDistributeBtn('weekend', `<i class="ph-fill ph-moon text-lg"></i> Closed on Weekends`);
-            return;
-        }
-
-        try {
-            const { count: paidToday, error: countErr } = await supabase
-                .from('profiles')
-                .select('id', { count: 'exact', head: true })
-                .gt('locked_capital', 0)
-                .eq('last_yield_date', todayStr);
-            if (countErr) throw countErr;
-
-            const { count: eligibleCount, error: eligErr } = await supabase
-                .from('profiles')
-                .select('id', { count: 'exact', head: true })
-                .gt('locked_capital', 0)
-                .or(`last_yield_date.is.null,last_yield_date.lt.${todayStr}`);
-            if (eligErr) throw eligErr;
-
-            const alreadyDone = eligibleCount === 0 && paidToday > 0;
-
-            if (alreadyDone) {
-                showLockStrip('locked',
-                    `<i class="ph-fill ph-check-circle text-brand-400 mr-1"></i>
-                     Today's yield (<strong class="text-white">${todayStr}</strong>) is complete —
-                     <strong class="text-white">${paidToday}</strong> investor${paidToday !== 1 ? 's' : ''} credited.<br>
-                     <span class="text-slate-400">Gate resets at midnight. New deposits earn from tomorrow.</span>`
-                );
-                setDistributeBtn('locked', `<i class="ph-fill ph-lock text-lg"></i> Locked — Resets at Midnight`);
-                startCountdown(checkDistributionStatus);
-            } else {
-                const inv = eligibleCount || 0;
-                const lastNote = inv > 0
-                    ? `<strong class="text-white">${inv}</strong> investor${inv !== 1 ? 's' : ''} ready.`
-                    : 'No active investors yet.';
-                showLockStrip('ready',
-                    `<i class="ph-fill ph-check-circle mr-1"></i>
-                     <strong>Ready.</strong> Date: <strong class="text-white">${todayStr}</strong>. ${lastNote}`
-                );
-                setDistributeBtn('ready', 'Run Daily Yield Distribution');
-            }
-        } catch(e) {
-            console.error('[checkDistributionStatus]', e);
-            showLockStrip('error',
-                `<i class="ph-fill ph-warning-circle mr-1"></i>
-                 Could not check status: <strong>${e.message}</strong>`
-            );
-            setDistributeBtn('ready', 'Run Daily Yield Distribution');
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // DISTRIBUTE GLOBAL DAILY INTEREST
-    // Same proven logic as index10.html — uses last_yield_date on profiles table.
-    // ═══════════════════════════════════════════════════════════════════════════
     async function distributeGlobalInterest() {
-        const statusBar = document.getElementById('yieldStatusBar');
-        statusBar.classList.remove('hidden');
+        const btn = document.getElementById('distributeBtn');
+        const progress = document.getElementById('distProgress');
 
         const todayDow = new Date().getDay();
         if (todayDow === 0 || todayDow === 6) {
-            statusBar.innerHTML = `<span class="text-amber-400"><i class="ph-fill ph-moon mr-1"></i>
-                <strong>Platform Closed.</strong> Daily yields run Monday–Friday only.</span>`;
-            showToast('⚠️ Closed on weekends. Come back Monday.');
+            progress.classList.remove('hidden');
+            progress.innerHTML = '⚠️ <strong>Platform Closed:</strong> Daily yields are distributed on weekdays only (Mon-Fri).';
             return;
         }
 
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        progress.classList.remove('hidden');
+        progress.innerHTML = '⏳ <strong>Running:</strong> Checking distribution status...';
+
         const todayStr = new Date().toLocaleDateString('sv-SE');
-        setDistributeBtn('checking', `<i class="ph-bold ph-spinner-gap animate-spin text-lg"></i> Running…`);
-        statusBar.innerHTML = `⏳ Checking distribution for <strong class="text-white">${todayStr}</strong>…`;
-        toggleLoader(true, 'Processing daily yields…');
 
         try {
-            const { count: alreadyStampedCount, error: preErr } = await supabase
-                .from('profiles')
-                .select('id', { count: 'exact', head: true })
-                .gt('locked_capital', 0)
-                .eq('last_yield_date', todayStr);
-            if (preErr) throw preErr;
-
-            statusBar.innerHTML = `⏳ Fetching eligible investors…`;
-
             const { data: investors, error: fetchErr } = await supabase
                 .from('profiles')
                 .select('id, phone, balance, total_income, locked_capital, last_yield_date')
                 .gt('locked_capital', 0)
                 .or(`last_yield_date.is.null,last_yield_date.lt.${todayStr}`);
+
             if (fetchErr) throw fetchErr;
 
             if (!investors || investors.length === 0) {
-                const deferredNote = alreadyStampedCount > 0
-                    ? ` (${alreadyStampedCount} investor${alreadyStampedCount > 1 ? 's' : ''} approved today deferred to tomorrow.)`
-                    : '';
-                statusBar.innerHTML = `
-                    <span class="text-brand-400">
-                        <i class="ph-fill ph-check-circle mr-1"></i>
-                        <strong>Already complete.</strong> Today's distribution (${todayStr}) is done.${deferredNote}
-                    </span>`;
-                showToast('✅ Already distributed today.');
-                toggleLoader(false);
-                checkDistributionStatus();
+                progress.innerHTML = `✅ <strong>Distribution Complete:</strong> All eligible investors have been paid for today (${todayStr}).`;
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
                 return;
             }
 
-            statusBar.innerHTML = `⚙️ Found <strong class="text-white">${investors.length}</strong> eligible investor(s). Crediting yields…`;
+            progress.innerHTML = `⏳ <strong>Processing:</strong> Analyzing ${investors.length} eligible investor(s)...`;
 
             let successCount = 0;
             let skippedCount = 0;
 
             for (const user of investors) {
                 const tier = getTierByCapital(user.locked_capital);
-                if (!tier) { skippedCount++; continue; }
-
-                const dailyYield     = tier.dailyInterest;
-                const newBalance     = parseFloat(user.balance     || 0) + dailyYield;
-                const newTotalIncome = parseFloat(user.total_income || 0) + dailyYield;
-
-                const { error: updateErr } = await supabase
-                    .from('profiles')
-                    .update({
-                        balance:         newBalance,
-                        total_income:    newTotalIncome,
-                        last_yield_date: todayStr,
-                    })
-                    .eq('id', user.id);
-
-                if (updateErr) {
-                    console.warn('Failed to update user', user.id, ':', updateErr.message);
+                if (!tier) {
                     skippedCount++;
                     continue;
                 }
 
-                await supabase.from('history').insert([{
-                    user_id:     user.id,
-                    amount:      dailyYield,
-                    type:        'yield',
-                    description: `Daily Yield Dividend — Received ₦${dailyYield.toLocaleString('en-NG')} interest reward.`,
-                    status:      'confirmed',
-                }]);
+                const dailyYield = tier.dailyInterest;
+                const newBalance = parseFloat(user.balance || 0) + dailyYield;
+                const newTotalIncome = parseFloat(user.total_income || 0) + dailyYield;
+
+                const { error: updateErr } = await supabase.from('profiles').update({
+                    balance: newBalance,
+                    total_income: newTotalIncome,
+                    last_yield_date: todayStr
+                }).eq('id', user.id);
+
+                if (updateErr) {
+                    console.warn('Failed to update user', user.id, updateErr.message);
+                    skippedCount++;
+                    continue;
+                }
+
+                await writeHistory(
+                    user.id,
+                    `Daily Yield Dividend — Received ₦${fmt(dailyYield)} interest reward.`,
+                    'yield',
+                    dailyYield,
+                    'confirmed'
+                );
 
                 successCount++;
             }
 
-            const deferred = alreadyStampedCount || 0;
-            let resultMsg = `✅ <strong class="text-brand-400">Done!</strong> ` +
-                `<strong class="text-white">${successCount}</strong> investor${successCount !== 1 ? 's' : ''} ` +
-                `credited for <strong class="text-white">${todayStr}</strong>.`;
-            if (skippedCount > 0) resultMsg += ` <span class="text-slate-400">${skippedCount} skipped (no matching tier).</span>`;
-            if (deferred > 0)     resultMsg += ` <span class="text-slate-400">${deferred} new signup${deferred !== 1 ? 's' : ''} deferred to tomorrow.</span>`;
+            progress.innerHTML = `✅ <strong>Success:</strong> Distributed daily yields to ${successCount} investor(s)! ${skippedCount > 0 ? `(${skippedCount} skipped)` : ''}`;
+            showToast(`✅ Daily interest distributed to ${successCount} investor(s)!`);
 
-            statusBar.innerHTML = resultMsg;
-            showToast(`✅ Daily yields sent to ${successCount} investor${successCount !== 1 ? 's' : ''}!`);
-
-        } catch(e) {
-            console.error('[distributeGlobalInterest]', e);
-            statusBar.innerHTML = `
-                <span class="text-red-400">
-                    <i class="ph-fill ph-x-circle mr-1"></i>
-                    <strong>Error:</strong> ${e.message}
-                </span>`;
-            showToast('❌ ' + e.message.split('.')[0]);
+        } catch (err) {
+            progress.innerHTML = `❌ <strong>Error:</strong> ${err.message}`;
+            showToast('Distribution failed.');
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
+    }
 
+    async function approveDeposit(depositId, userId, amount) {
+        const amt = Number(amount);
+        const tier = TIER_CONFIG.find(t => t.deposit === amt);
+        if (!tier) return showToast('❌ Tier not found');
+
+        toggleLoader(true, 'Approving Deposit…');
+        try {
+            const { data: currentDep, error: depErr } = await supabase.from('deposits').select('status').eq('id', depositId).single();
+            if (depErr || currentDep.status !== 'pending') {
+                toggleLoader(false);
+                return showToast('⚠️ Deposit has already been processed.');
+            }
+
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+            const newLocked = Math.max(parseFloat(profile.locked_capital || 0), amt);
+            const newBalance = parseFloat(profile.balance || 0) + tier.welcomeBonus;
+            const newIncome = parseFloat(profile.total_income || 0) + tier.welcomeBonus;
+            const approvalDateISO = new Date().toLocaleDateString('sv-SE');
+
+            await supabase.from('profiles').update({ 
+                locked_capital: newLocked, 
+                balance: newBalance, 
+                total_income: newIncome,
+                last_yield_date: approvalDateISO
+            }).eq('id', userId);
+            
+            await supabase.from('deposits').update({ status: 'confirmed' }).eq('id', depositId);
+            
+            await writeHistory(userId, `Deposit Confirmed — ₦${fmt(amt)} locked capital.`, 'deposit', amt, 'confirmed');
+            await writeHistory(userId, `Tier Welcome Bonus — Received ₦${fmt(tier.welcomeBonus)} instantly.`, 'bonus', tier.welcomeBonus, 'confirmed');
+
+            if (profile.referred_by) {
+                const { data: prevDeps } = await supabase.from('deposits').select('id').eq('user_id', userId).eq('status', 'confirmed').neq('id', depositId);
+                
+                if (!prevDeps || prevDeps.length === 0) {
+                    const { data: referrer } = await supabase.from('profiles').select('*').eq('referral_code', profile.referred_by).maybeSingle();
+                    if (referrer) {
+                        const refNewBal = parseFloat(referrer.balance || 0) + tier.referralBonus;
+                        const refNewInc = parseFloat(referrer.total_income || 0) + tier.referralBonus;
+                        
+                        await supabase.from('profiles').update({ balance: refNewBal, total_income: refNewInc }).eq('id', referrer.id);
+                        await writeHistory(referrer.id, `Referral Bonus — Earned ₦${fmt(tier.referralBonus)} from network invitee.`, 'referral', tier.referralBonus, 'confirmed');
+                    }
+                }
+            }
+
+            document.getElementById(`depCard-${depositId}`).remove();
+            showToast(`✅ Approved — ₦${fmt(tier.welcomeBonus)} welcome bonus sent`);
+        } catch(e) { showToast('❌ Approval failed'); }
         toggleLoader(false);
-        checkDistributionStatus();
-    }
-</script>
-
-<!-- ════════════════════════════════════════
-     FLOATING TELEGRAM BUTTON
-════════════════════════════════════════ -->
-<a id="telegramBtn"
-   href="https://t.me/+yKTzqU341V80NWU0"
-   target="_blank"
-   rel="noopener noreferrer"
-   aria-label="Join our Telegram group"
-   title="Join Telegram">
-    <i class="ph-fill ph-telegram-logo"></i>
-</a>
-
-<style>
-    #telegramBtn {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 1000;
-        width: 52px;
-        height: 52px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 26px;
-        color: #020617;
-        background: linear-gradient(135deg, #059669, #34d399);
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.35),
-                    0 4px 16px rgba(0, 0, 0, 0.4);
-        cursor: grab;
-        text-decoration: none;
-        user-select: none;
-        -webkit-user-select: none;
-        touch-action: none;
-        transition: box-shadow 0.2s ease, transform 0.15s ease;
-    }
-    #telegramBtn:hover {
-        box-shadow: 0 0 30px rgba(16, 185, 129, 0.55),
-                    0 6px 20px rgba(0, 0, 0, 0.45);
-        transform: scale(1.08);
-    }
-    #telegramBtn:active {
-        cursor: grabbing;
-        transform: scale(0.96);
-    }
-    #telegramBtn.is-dragging {
-        cursor: grabbing;
-        box-shadow: 0 0 35px rgba(16, 185, 129, 0.6),
-                    0 8px 28px rgba(0, 0, 0, 0.5);
-        transform: scale(1.1);
-        transition: box-shadow 0.15s ease;
-    }
-</style>
-
-<script>
-(function () {
-    const btn = document.getElementById('telegramBtn');
-    let isDragging = false;
-    let hasDragged  = false;
-    let startX, startY, startLeft, startTop;
-
-    /* Convert bottom/right anchor to top/left for free movement */
-    function initTopLeft() {
-        const rect = btn.getBoundingClientRect();
-        btn.style.top    = rect.top  + 'px';
-        btn.style.left   = rect.left + 'px';
-        btn.style.bottom = 'auto';
-        btn.style.right  = 'auto';
     }
 
-    function clamp(val, min, max) {
-        return Math.min(Math.max(val, min), max);
+    async function declineDeposit(depositId, userId, amount) {
+        toggleLoader(true, 'Declining Deposit…');
+        try {
+            await supabase.from('deposits').update({ status: 'declined' }).eq('id', depositId);
+            await writeHistory(userId, `Deposit Declined — ₦${fmt(amount)} request rejected by auditing team.`, 'deposit', amount, 'declined');
+
+            document.getElementById(`depCard-${depositId}`).remove();
+            showToast('🚫 Deposit declined');
+        } catch(e) { showToast('❌ Error'); }
+        toggleLoader(false);
     }
 
-    function applyPosition(clientX, clientY) {
-        const W = window.innerWidth;
-        const H = window.innerHeight;
-        const MARGIN = 8;
-        const newLeft = clamp(clientX - startX + startLeft, MARGIN, W - btn.offsetWidth  - MARGIN);
-        const newTop  = clamp(clientY - startY + startTop,  MARGIN, H - btn.offsetHeight - MARGIN);
-        btn.style.left = newLeft + 'px';
-        btn.style.top  = newTop  + 'px';
+    async function approveWithdrawal(withdrawalId, userId, amount) {
+        const amt = Number(amount);
+        toggleLoader(true, 'Approving Withdrawal…');
+        try {
+            await supabase.from('withdrawals').update({ status: 'confirmed' }).eq('id', withdrawalId);
+            await writeHistory(userId, `Withdrawal Settled — ₦${fmt(amt)} payout deduction processed.`, 'withdrawal', amt, 'confirmed');
+            
+            document.getElementById(`wdCard-${withdrawalId}`).remove();
+            showToast(`✅ Withdrawal approved`);
+        } catch(e) { showToast('❌ Approval failed'); }
+        toggleLoader(false);
     }
 
-    /* ── MOUSE ── */
-    btn.addEventListener('mousedown', function (e) {
-        if (e.button !== 0) return;
-        e.preventDefault();
-        initTopLeft();
-        isDragging = true;
-        hasDragged  = false;
-        startX    = e.clientX;
-        startY    = e.clientY;
-        startLeft = btn.offsetLeft;
-        startTop  = btn.offsetTop;
-        btn.classList.add('is-dragging');
-    });
+    async function declineWithdrawal(withdrawalId, userId, amount) {
+        toggleLoader(true, 'Declining & Refunding…');
+        try {
+            const amt = Number(amount);
+            const { data: profile } = await supabase.from('profiles').select('balance').eq('id', userId).single();
+            const refundedBal = parseFloat(profile.balance || 0) + amt;
 
-    document.addEventListener('mousemove', function (e) {
-        if (!isDragging) return;
-        if (Math.abs(e.clientX - startX) > 4 || Math.abs(e.clientY - startY) > 4) hasDragged = true;
-        applyPosition(e.clientX, e.clientY);
-    });
+            await supabase.from('profiles').update({ balance: refundedBal }).eq('id', userId);
+            await supabase.from('withdrawals').update({ status: 'declined' }).eq('id', withdrawalId);
+            
+            await writeHistory(userId, `Withdrawal Declined (Refund Issued) — ₦${fmt(amt)} securely restored to balance.`, 'refund', amt, 'confirmed');
+            
+            document.getElementById(`wdCard-${withdrawalId}`).remove();
+            showToast('🚫 Declined & Balance Refunded');
+        } catch(e) { showToast('❌ Error'); }
+        toggleLoader(false);
+    }
 
-    document.addEventListener('mouseup', function () {
-        if (!isDragging) return;
-        isDragging = false;
-        btn.classList.remove('is-dragging');
-        /* Block the click that fires immediately after a drag */
-        if (hasDragged) {
-            const block = function (ev) {
-                ev.preventDefault();
-                ev.stopImmediatePropagation();
-                btn.removeEventListener('click', block, true);
-            };
-            btn.addEventListener('click', block, true);
+    function initTelegramBtn() {
+        const btn = document.getElementById('telegramBtn');
+        if (!btn) return;
+        let isDragging = false, hasDragged = false;
+        let startX, startY, startLeft, startTop;
+
+        function initTopLeft() {
+            const rect = btn.getBoundingClientRect();
+            btn.style.top = rect.top + 'px';
+            btn.style.left = rect.left + 'px';
+            btn.style.bottom = 'auto';
+            btn.style.right = 'auto';
         }
-    });
 
-    /* ── TOUCH ── */
-    btn.addEventListener('touchstart', function (e) {
-        const t = e.touches[0];
-        initTopLeft();
-        isDragging = true;
-        hasDragged  = false;
-        startX    = t.clientX;
-        startY    = t.clientY;
-        startLeft = btn.offsetLeft;
-        startTop  = btn.offsetTop;
-        btn.classList.add('is-dragging');
-    }, { passive: true });
+        function applyPosition(clientX, clientY) {
+            const margin = 8;
+            btn.style.left = Math.min(Math.max(clientX - startX + startLeft, margin), window.innerWidth - btn.offsetWidth - margin) + 'px';
+            btn.style.top = Math.min(Math.max(clientY - startY + startTop, margin), window.innerHeight - btn.offsetHeight - margin) + 'px';
+        }
 
-    btn.addEventListener('touchmove', function (e) {
-        if (!isDragging) return;
-        e.preventDefault();   /* prevent page scroll while dragging */
-        const t = e.touches[0];
-        if (Math.abs(t.clientX - startX) > 4 || Math.abs(t.clientY - startY) > 4) hasDragged = true;
-        applyPosition(t.clientX, t.clientY);
-    }, { passive: false });
+        btn.addEventListener('mousedown', function (e) {
+            if (e.button !== 0) return; e.preventDefault();
+            initTopLeft(); isDragging = true; hasDragged = false;
+            startX = e.clientX; startY = e.clientY; startLeft = btn.offsetLeft; startTop = btn.offsetTop;
+            btn.classList.add('scale-110', 'shadow-[0_0_35px_rgba(16,185,129,0.6)]');
+        });
 
-    btn.addEventListener('touchend', function (e) {
-        if (!isDragging) return;
-        isDragging = false;
-        btn.classList.remove('is-dragging');
-        if (hasDragged) e.preventDefault();   /* suppress tap-navigation after a drag */
-    });
-})();
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            if (Math.abs(e.clientX - startX) > 4 || Math.abs(e.clientY - startY) > 4) hasDragged = true;
+            applyPosition(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (!isDragging) return; isDragging = false;
+            btn.classList.remove('scale-110', 'shadow-[0_0_35px_rgba(16,185,129,0.6)]');
+            if (hasDragged) {
+                const block = function (ev) { ev.preventDefault(); ev.stopImmediatePropagation(); btn.removeEventListener('click', block, true); };
+                btn.addEventListener('click', block, true);
+            }
+        });
+
+        btn.addEventListener('touchstart', function (e) {
+            initTopLeft(); isDragging = true; hasDragged = false;
+            const touch = e.touches[0];
+            startX = touch.clientX; startY = touch.clientY; startLeft = btn.offsetLeft; startTop = btn.offsetTop;
+            btn.classList.add('scale-110', 'shadow-[0_0_35px_rgba(16,185,129,0.6)]');
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function (e) {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            if (Math.abs(touch.clientX - startX) > 4 || Math.abs(touch.clientY - startY) > 4) {
+                hasDragged = true;
+            }
+            applyPosition(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        document.addEventListener('touchend', function () {
+            if (!isDragging) return; isDragging = false;
+            btn.classList.remove('scale-110', 'shadow-[0_0_35px_rgba(16,185,129,0.6)]');
+            if (!hasDragged) {
+                window.open(btn.href, '_blank', 'noopener,noreferrer');
+            }
+        });
+    }
 </script>
 
 </body>
