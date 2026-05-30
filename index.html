@@ -701,6 +701,18 @@
                 <div id="distProgress" class="hidden mt-3 text-[11px] font-medium text-brand-400/90 text-center bg-brand-500/10 p-2.5 rounded-lg border border-brand-500/20 leading-relaxed"></div>
             </div>
 
+            <!-- Stats Overview (NEW) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass-card rounded-2xl p-4 border-brand-500/20 bg-brand-900/10">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Approved Deposits</div>
+                    <div id="adminTotalDeposits" class="text-xl font-black text-brand-400 tracking-tight">₦0.00</div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 border-red-500/20 bg-red-900/10">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Approved Withdrawals</div>
+                    <div id="adminTotalWithdrawals" class="text-xl font-black text-red-400 tracking-tight">₦0.00</div>
+                </div>
+            </div>
+
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Region Filter</span>
                 <select id="adminRegionFilter" onchange="loadAdminData()" class="bg-slate-800 text-white text-xs rounded-lg px-3 py-1.5 outline-none border border-slate-700">
@@ -1745,6 +1757,33 @@
         }
     }
 
+    async function loadAdminStats() {
+        try {
+            const { data, error } = await supabase.from('admin_stats').select('*').eq('id', 1).single();
+            if (error) throw error;
+            if (data) {
+                document.getElementById('adminTotalDeposits').textContent = `₦${fmt(data.total_approved_deposits || 0)}`;
+                document.getElementById('adminTotalWithdrawals').textContent = `₦${fmt(data.total_approved_withdrawals || 0)}`;
+            }
+        } catch (e) {
+            console.error('Failed to load admin stats:', e);
+        }
+    }
+
+    async function incrementAdminStat(field, amount) {
+        try {
+            const { data, error } = await supabase.rpc('increment_admin_stat', {
+                stat_field: field,
+                delta: amount
+            });
+            if (error) throw error;
+            return data;
+        } catch (e) {
+            console.error(`Failed to increment ${field}:`, e);
+            return null;
+        }
+    }
+
     async function loadAdminData() {
         document.getElementById('pendingDeposits').innerHTML = '<div class="text-center text-slate-500 py-6">Loading…</div>';
         document.getElementById('pendingWithdrawals').innerHTML = '<div class="text-center text-slate-500 py-6">Loading…</div>';
@@ -1752,6 +1791,8 @@
         const filterRegion = document.getElementById('adminRegionFilter').value;
 
         try {
+            await loadAdminStats();
+
             const [depRes, wdRes] = await Promise.all([
                 supabase.from('deposits').select('*, profiles(phone, region, locked_capital, bank_name, account_number, account_name)').eq('status', 'pending').order('created_at', { ascending: false }),
                 supabase.from('withdrawals').select('*, profiles(phone, region)').eq('status', 'pending').order('created_at', { ascending: false }),
@@ -1936,6 +1977,12 @@
             await writeHistory(userId, `Deposit Confirmed — ₦${fmt(amt)} locked capital.`, 'deposit', amt, 'confirmed');
             await writeHistory(userId, `Tier Welcome Bonus — Received ₦${fmt(tier.welcomeBonus)} instantly.`, 'bonus', tier.welcomeBonus, 'confirmed');
 
+            // Update global approved deposit stats
+            const newTotalDep = await incrementAdminStat('total_approved_deposits', amt);
+            if (newTotalDep !== null) {
+                document.getElementById('adminTotalDeposits').textContent = `₦${fmt(newTotalDep)}`;
+            }
+
             if (profile.referred_by) {
                 const { data: prevDeps } = await supabase.from('deposits').select('id').eq('user_id', userId).eq('status', 'confirmed').neq('id', depositId);
                 
@@ -1987,6 +2034,12 @@
         try {
             await supabase.from('withdrawals').update({ status: 'confirmed' }).eq('id', withdrawalId);
             await writeHistory(userId, `Withdrawal Settled — ₦${fmt(amt)} payout deduction processed.`, 'withdrawal', amt, 'confirmed');
+            
+            // Update global approved withdrawal stats
+            const newTotalWd = await incrementAdminStat('total_approved_withdrawals', amt);
+            if (newTotalWd !== null) {
+                document.getElementById('adminTotalWithdrawals').textContent = `₦${fmt(newTotalWd)}`;
+            }
             
             document.getElementById(`wdCard-${withdrawalId}`).remove();
             showToast(`✅ Withdrawal approved`);
