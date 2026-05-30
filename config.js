@@ -16,7 +16,7 @@ const REGION_BANKS = {
         { bank: 'KudaBank', name: 'Samuel Richard', account: '3003630704' }
     ],
     'North-East': [
-        { bank: 'Kuda', name: 'Adeyanju Amos', account: '2087315466' }
+        { bank: 'Moniepoint MFB', name: 'Amos Ayomide Adeyanju', account: '5219345011' }
     ],
     'South-West': [
         { bank: 'Moniepoint MFB', name: 'Amos Ayomide Adeyanju', account: '5219345011' }
