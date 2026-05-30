@@ -240,19 +240,22 @@
     <div id="dashboardPage" class="hidden flex-col min-h-[100dvh] pb-24 relative">
         <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-[80px] pointer-events-none"></div>
 
+        <!-- Updated Header: Removed avatar, added Bonus Wallet icon -->
         <div class="flex items-center justify-between px-6 py-6 pt-8 z-10 relative">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
-                    <i class="ph-fill ph-user text-2xl text-slate-400"></i>
-                </div>
-                <div>
-                    <div class="text-xs text-slate-400 font-medium tracking-wide uppercase">Welcome back</div>
-                    <div class="text-lg font-bold text-white tracking-tight" id="welcomeMessage">Loading...</div>
-                </div>
+            <div>
+                <div class="text-xs text-slate-400 font-medium tracking-wide uppercase">Welcome back</div>
+                <div class="text-lg font-bold text-white tracking-tight" id="welcomeMessage">Loading...</div>
             </div>
-            <button id="adminLaunchBtn" onclick="navigateTo('adminPage')" class="hidden w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 items-center justify-center transition hover:bg-amber-500/30">
-                <i class="ph-fill ph-shield-check text-xl"></i>
-            </button>
+            <div class="flex items-center gap-2">
+                <!-- Bonus Wallet Icon -->
+                <button onclick="openBonusModal()" class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center transition hover:bg-amber-500/30 active:scale-95 relative">
+                    <i class="ph-fill ph-gift text-xl"></i>
+                    <span id="bonusBadge" class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full text-[9px] font-black text-slate-950 flex items-center justify-center hidden">!</span>
+                </button>
+                <button id="adminLaunchBtn" onclick="navigateTo('adminPage')" class="hidden w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 items-center justify-center transition hover:bg-amber-500/30">
+                    <i class="ph-fill ph-shield-check text-xl"></i>
+                </button>
+            </div>
         </div>
 
         <div class="px-6 mb-6 z-10 relative">
@@ -325,6 +328,40 @@
                 </div>
                 <i class="ph-bold ph-caret-right text-amber-400/50 relative z-10 text-lg"></i>
             </button>
+        </div>
+    </div>
+
+    <!-- BONUS WALLET MODAL -->
+    <div id="bonusModal" class="hidden fixed inset-0 z-[99000] flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onclick="document.getElementById('bonusModal').classList.add('hidden')"></div>
+        <div class="relative z-10 w-full max-w-sm glass-card rounded-3xl border border-amber-500/30 bg-gradient-to-b from-slate-900 to-slate-950 overflow-hidden shadow-[0_0_60px_rgba(245,158,11,0.2)]">
+            <div class="h-1 w-full bg-gradient-to-r from-amber-500 via-brand-400 to-amber-500 opacity-70"></div>
+            <div class="p-8 flex flex-col items-center text-center relative">
+                <button onclick="document.getElementById('bonusModal').classList.add('hidden')" class="absolute top-3 right-3 w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+                <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-gift text-3xl text-amber-400"></i>
+                </div>
+                <div class="text-xs font-bold tracking-widest text-slate-400 uppercase mb-2">Bonus Wallet</div>
+                <div id="bonusModalAmount" class="text-3xl font-black text-amber-400 tracking-tight mb-1">₦0.00</div>
+                <div class="text-xs text-slate-500 mb-6">Available for instant withdrawal</div>
+                
+                <div class="w-full space-y-3">
+                    <div class="glass-input flex items-center h-12 rounded-xl px-4">
+                        <span class="text-slate-400 font-bold mr-2">₦</span>
+                        <input type="number" id="bonusWithdrawAmount" class="bg-transparent w-full h-full outline-none text-white font-bold placeholder-slate-600" placeholder="Amount to withdraw">
+                    </div>
+                    <button onclick="withdrawBonus()" class="glow-btn w-full h-12 rounded-xl text-sm flex items-center justify-center gap-2">
+                        Withdraw Bonus <i class="ph-bold ph-paper-plane-right"></i>
+                    </button>
+                    <div class="flex items-center justify-center gap-2 text-[10px] text-slate-500 mt-2">
+                        <span class="bg-slate-800 px-2 py-1 rounded-full border border-slate-700">No minimum</span>
+                        <span class="bg-slate-800 px-2 py-1 rounded-full border border-slate-700">Zero fees</span>
+                        <span class="bg-slate-800 px-2 py-1 rounded-full border border-slate-700">Any day</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -567,6 +604,79 @@
         </div>
     </div>
 
+    <!-- PROFILE PAGE -->
+    <div id="profilePage" class="hidden flex-col min-h-[100dvh] pb-24 bg-slate-950 z-20">
+        <div class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-4 py-4">
+            <button onclick="goBackToDashboard()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-900 transition">
+                <i class="ph-bold ph-arrow-left text-xl"></i>
+            </button>
+            <h2 class="text-lg font-bold text-white">My Profile</h2>
+            <div class="w-10"></div>
+        </div>
+        <div class="p-6 space-y-6">
+            <!-- Real-time Earnings Tracker -->
+            <div class="glass-card rounded-3xl p-6 text-center relative overflow-hidden bg-gradient-to-b from-brand-900/20 to-slate-900 border-brand-500/30">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i class="ph-fill ph-chart-line-up text-6xl text-brand-400"></i>
+                </div>
+                <div class="text-[10px] font-bold tracking-widest text-brand-400 uppercase mb-2">Total Earned</div>
+                <div id="profileTotalEarned" class="text-4xl font-extrabold text-white tracking-tight mb-2">₦0.00</div>
+                <div class="text-xs text-slate-400">Updates automatically with every transaction</div>
+                <div class="mt-4 pt-4 border-t border-slate-800 flex justify-around">
+                    <div class="text-center">
+                        <div class="text-[10px] text-slate-500 uppercase font-bold">Balance</div>
+                        <div id="profileSubBalance" class="text-sm font-bold text-brand-400 mt-1">₦0.00</div>
+                    </div>
+                    <div class="w-px bg-slate-800"></div>
+                    <div class="text-center">
+                        <div class="text-[10px] text-slate-500 uppercase font-bold">Bonus</div>
+                        <div id="profileSubBonus" class="text-sm font-bold text-amber-400 mt-1">₦0.00</div>
+                    </div>
+                    <div class="w-px bg-slate-800"></div>
+                    <div class="text-center">
+                        <div class="text-[10px] text-slate-500 uppercase font-bold">Locked</div>
+                        <div id="profileSubLocked" class="text-sm font-bold text-slate-300 mt-1">₦0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div>
+                <div class="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">Personal Details</div>
+                <div class="space-y-4">
+                    <div class="glass-input flex items-center h-14 rounded-xl px-4">
+                        <i class="ph ph-user text-slate-400 text-xl mr-3"></i>
+                        <input type="text" id="profileFullName" class="bg-transparent w-full h-full outline-none text-white placeholder-slate-500" placeholder="Full Name">
+                    </div>
+                    <div class="glass-input flex items-center h-14 rounded-xl px-4">
+                        <i class="ph ph-phone text-slate-400 text-xl mr-3"></i>
+                        <input type="text" id="profilePhone" class="bg-transparent w-full h-full outline-none text-slate-500" readonly>
+                    </div>
+                    <div class="glass-input flex items-center h-14 rounded-xl px-4">
+                        <i class="ph ph-map-pin text-slate-400 text-xl mr-3"></i>
+                        <select id="profileRegion" class="bg-transparent w-full h-full outline-none text-white appearance-none">
+                            <option value="" disabled class="bg-slate-900 text-slate-500">Select Region</option>
+                            <option value="North-Central" class="bg-slate-900">North-Central</option>
+                            <option value="North-West" class="bg-slate-900">North-West</option>
+                            <option value="North-East" class="bg-slate-900">North-East</option>
+                            <option value="South-West" class="bg-slate-900">South-West</option>
+                            <option value="South-South" class="bg-slate-900">South-South</option>
+                            <option value="South-East" class="bg-slate-900">South-East</option>
+                        </select>
+                    </div>
+                    <div class="glass-input flex items-center h-14 rounded-xl px-4">
+                        <i class="ph ph-users text-slate-400 text-xl mr-3"></i>
+                        <input type="text" id="profileReferral" class="bg-transparent w-full h-full outline-none text-slate-500" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="saveProfile()" class="glow-btn w-full h-14 rounded-full text-[15px] flex items-center justify-center gap-2">
+                Save Changes <i class="ph-bold ph-floppy-disk"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- ADMIN PAGE -->
     <div id="adminPage" class="hidden flex-col min-h-[100dvh] bg-slate-950 z-40 pb-24">
         <div class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 px-4 py-4 flex justify-between items-center">
@@ -641,23 +751,27 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAV -->
-    <nav id="bottomNav" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-[80px] bg-slate-950/90 backdrop-blur-xl border-t border-slate-800 z-[50] flex items-center justify-around px-2 pb-safe">
-        <button onclick="navBottom('dashboardPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group active" data-target="dashboardPage">
+    <!-- BOTTOM NAV: 5 tabs including Profile -->
+    <nav id="bottomNav" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-[80px] bg-slate-950/90 backdrop-blur-xl border-t border-slate-800 z-[50] flex items-center justify-between px-2 pb-safe">
+        <button onclick="navBottom('dashboardPage')" class="nav-btn flex-1 flex flex-col items-center gap-1 group active" data-target="dashboardPage">
             <i class="ph-fill ph-house text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Home</span>
         </button>
-        <button onclick="navBottom('depositPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group" data-target="depositPage">
+        <button onclick="navBottom('depositPage')" class="nav-btn flex-1 flex flex-col items-center gap-1 group" data-target="depositPage">
             <i class="ph-fill ph-wallet text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Deposit</span>
         </button>
-        <button onclick="navBottom('withdrawPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group" data-target="withdrawPage">
+        <button onclick="navBottom('withdrawPage')" class="nav-btn flex-1 flex flex-col items-center gap-1 group" data-target="withdrawPage">
             <i class="ph-fill ph-paper-plane-tilt text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Withdraw</span>
         </button>
-        <button onclick="navBottom('referralPage')" class="nav-btn w-16 flex flex-col items-center gap-1 group" data-target="referralPage">
+        <button onclick="navBottom('referralPage')" class="nav-btn flex-1 flex flex-col items-center gap-1 group" data-target="referralPage">
             <i class="ph-fill ph-users-three text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
             <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Referrals</span>
+        </button>
+        <button onclick="navBottom('profilePage')" class="nav-btn flex-1 flex flex-col items-center gap-1 group" data-target="profilePage">
+            <i class="ph-fill ph-user text-2xl text-slate-500 group-[.active]:text-brand-400 transition-all duration-300"></i>
+            <span class="text-[10px] font-medium text-slate-500 group-[.active]:text-white transition-colors">Profile</span>
         </button>
     </nav>
 
@@ -698,7 +812,7 @@
 </div>
 
 <!-- TELEGRAM BUTTON -->
-<a id="telegramBtn" href="https://t.me/+yKTzqU341V80NWU0" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 w-[52px] h-[52px] bg-gradient-to-br from-brand-600 to-brand-400 rounded-full flex items-center justify-center text-slate-950 text-2xl shadow-[0_0_20px_rgba(16,185,129,0.35)] cursor-grab z-[1000] hover:scale-110 transition-transform touch-none">
+<a id="telegramBtn" href="https://t.me/+yKTzqU341V80NWU0" target="_blank" rel="noopener noreferrer" class="fixed bottom-24 right-6 w-[52px] h-[52px] bg-gradient-to-br from-brand-600 to-brand-400 rounded-full flex items-center justify-center text-slate-950 text-2xl shadow-[0_0_20px_rgba(16,185,129,0.35)] cursor-grab z-[1000] hover:scale-110 transition-transform touch-none">
     <i class="ph-fill ph-telegram-logo"></i>
 </a>
 
@@ -731,8 +845,44 @@
 
     let currentUser = null;
     let selectedDepositAmount = null;
+    let realtimeChannel = null;
 
-    function fmt(num) { return num.toLocaleString('en-NG'); }
+    function fmt(num) { return (Number(num) || 0).toLocaleString('en-NG'); }
+
+    // REALTIME SYNC — ensures dashboard updates instantly when backend changes
+    function initRealtime() {
+        if (!supabase || !currentUser) return;
+        if (realtimeChannel) {
+            supabase.removeChannel(realtimeChannel);
+        }
+        realtimeChannel = supabase
+            .channel(`user-sync-${currentUser.id}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'profiles',
+                filter: `id=eq.${currentUser.id}`
+            }, async (payload) => {
+                if (payload.new) {
+                    const oldBal = currentUser.balance;
+                    const oldBonus = currentUser.bonus_balance;
+                    currentUser = payload.new;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    await refreshUserData();
+                    if (oldBal !== currentUser.balance || oldBonus !== currentUser.bonus_balance) {
+                        showToast('💰 Balance Synced');
+                    }
+                }
+            })
+            .subscribe();
+    }
+
+    function stopRealtime() {
+        if (realtimeChannel) {
+            supabase.removeChannel(realtimeChannel);
+            realtimeChannel = null;
+        }
+    }
 
     // UNIVERSAL HISTORY LOGGER
     async function writeHistory(userId, description, type = 'general', amount = 0, status = 'confirmed') {
@@ -881,6 +1031,7 @@
         referralPage  : ['Loading Network…',         'Fetching Referral Data…',    'Opening Referral Hub…'],
         historyPage   : ['Loading Transactions…',    'Fetching Records…',          'Opening Transaction Log…'],
         adminPage     : ['Entering Admin Portal…',   'Verifying Privileges…',      'Loading Admin Tools…'],
+        profilePage   : ['Loading Profile…',         'Fetching User Data…',        'Opening Profile Center…'],
     };
     const NAV_SUBTEXTS = [
         'Securing Connection', 'Verifying Session',
@@ -980,6 +1131,8 @@
             localStorage.setItem('moblie', rawPhone);
             localStorage.setItem('password', pass);
             
+            initRealtime();
+            
             setTimeout(() => {
                 toggleLoader(false);
                 showToast('✅ Login Successful');
@@ -1016,7 +1169,8 @@
                 phone: normalizedPhone,
                 password: pass,
                 region: region,
-                referred_by: ref || null
+                referred_by: ref || null,
+                bonus_balance: 0
             }]);
 
             if (error) throw error;
@@ -1032,6 +1186,7 @@
     }
 
     function handleLogout() {
+        stopRealtime();
         currentUser = null;
         localStorage.removeItem('currentUser');
         document.getElementById('bottomNav').classList.add('hidden');
@@ -1060,6 +1215,7 @@
 
                 currentUser = data;
                 localStorage.setItem('currentUser', JSON.stringify(data));
+                initRealtime();
                 toggleLoader(false);
                 showDashboard();
             } catch (e) {
@@ -1076,7 +1232,7 @@
         }
     });
 
-    const VIEWS = ['authPage', 'dashboardPage', 'depositPage', 'withdrawPage', 'bankSetupPage', 'referralPage', 'historyPage', 'adminPage'];
+    const VIEWS = ['authPage', 'dashboardPage', 'depositPage', 'withdrawPage', 'bankSetupPage', 'referralPage', 'historyPage', 'adminPage', 'profilePage'];
     
     function switchView(targetId) {
         VIEWS.forEach(id => {
@@ -1106,7 +1262,7 @@
         }
 
         // Bank-details gate — redirect with overlay
-        if (page !== 'bankSetupPage' && page !== 'dashboardPage' && page !== 'adminPage' &&
+        if (page !== 'bankSetupPage' && page !== 'dashboardPage' && page !== 'adminPage' && page !== 'profilePage' &&
             (!currentUser.bank_name || !currentUser.account_number)) {
             showToast('⚠️ Bank details required first');
             showNavLoader('bankSetupPage', () => switchView('bankSetupPage'));
@@ -1117,6 +1273,7 @@
             if (page === 'historyPage')   loadHistory();
             if (page === 'withdrawPage')  prepareWithdrawalView();
             if (page === 'adminPage')     loadAdminData();
+            if (page === 'profilePage')   prepareProfileView();
             switchView(page);
         });
     }
@@ -1155,11 +1312,28 @@
             currentUser = data;
             localStorage.setItem('currentUser', JSON.stringify(data));
 
-            document.getElementById('welcomeMessage').textContent = data.phone;
-            document.getElementById('userBalance').textContent = `₦${fmt(data.balance || 0)}`;
-            document.getElementById('lockedCapital').textContent = `₦${fmt(data.locked_capital || 0)}`;
-            document.getElementById('totalIncome').textContent = `₦${fmt(data.total_income || 0)}`;
+            document.getElementById('welcomeMessage').textContent = data.phone || 'User';
+            document.getElementById('userBalance').textContent = `₦${fmt(data.balance)}`;
+            document.getElementById('lockedCapital').textContent = `₦${fmt(data.locked_capital)}`;
+            document.getElementById('totalIncome').textContent = `₦${fmt(data.total_income)}`;
             document.getElementById('userReferralCode').textContent = data.referral_code || 'N/A';
+
+            // Update profile page earnings tracker if visible
+            const profileTotalEarned = document.getElementById('profileTotalEarned');
+            if (profileTotalEarned) profileTotalEarned.textContent = `₦${fmt(data.total_income)}`;
+            const profileSubBalance = document.getElementById('profileSubBalance');
+            if (profileSubBalance) profileSubBalance.textContent = `₦${fmt(data.balance)}`;
+            const profileSubLocked = document.getElementById('profileSubLocked');
+            if (profileSubLocked) profileSubLocked.textContent = `₦${fmt(data.locked_capital)}`;
+            const profileSubBonus = document.getElementById('profileSubBonus');
+            if (profileSubBonus) profileSubBonus.textContent = `₦${fmt(data.bonus_balance)}`;
+
+            // Bonus badge indicator
+            const bonusBadge = document.getElementById('bonusBadge');
+            if (bonusBadge) {
+                const hasBonus = parseFloat(data.bonus_balance || 0) > 0;
+                bonusBadge.classList.toggle('hidden', !hasBonus);
+            }
 
             const activeTier = getTierByCapital(data.locked_capital);
             const tag = document.getElementById('activeTierTag');
@@ -1221,6 +1395,8 @@
                         icon = 'ph-trend-up'; iconColor = 'text-brand-400'; amountColor = 'text-brand-400'; sign = '+';
                     } else if (tx.type === 'refund') {
                         icon = 'ph-arrow-u-up-left'; iconColor = 'text-blue-400'; amountColor = 'text-blue-400'; sign = '+';
+                    } else if (tx.type === 'bonus_withdrawal') {
+                        icon = 'ph-gift'; iconColor = 'text-amber-400'; amountColor = 'text-amber-400'; sign = '-';
                     }
                 }
 
@@ -1261,6 +1437,112 @@
         } catch(e) { showToast('Error saving bank'); }
         toggleLoader(false);
     }
+
+    // ── Bonus Wallet Functions ─────────────────────────────────────────────
+    async function openBonusModal() {
+        await refreshUserData();
+        const bonusBal = parseFloat(currentUser?.bonus_balance || 0);
+        document.getElementById('bonusModalAmount').textContent = `₦${fmt(bonusBal)}`;
+        document.getElementById('bonusWithdrawAmount').value = '';
+        document.getElementById('bonusModal').classList.remove('hidden');
+    }
+
+    async function withdrawBonus() {
+        const amount = parseFloat(document.getElementById('bonusWithdrawAmount').value);
+        if (!amount || amount <= 0) return showToast('Enter a valid amount');
+        
+        const bonusBal = parseFloat(currentUser?.bonus_balance || 0);
+        if (amount > bonusBal) return showToast('Insufficient bonus balance');
+        
+        const mainBal = parseFloat(currentUser?.balance || 0);
+        if (amount > mainBal) return showToast('Insufficient total balance');
+
+        // Require bank details
+        if (!currentUser.bank_name || !currentUser.account_number) {
+            return showToast('⚠️ Link bank details first');
+        }
+
+        toggleLoader(true, 'Processing Bonus Withdrawal...');
+        try {
+            const newBonusBal = bonusBal - amount;
+            const newBal = mainBal - amount;
+            
+            const { error } = await supabase.from('profiles').update({ 
+                bonus_balance: newBonusBal,
+                balance: newBal
+            }).eq('id', currentUser.id);
+            
+            if (error) throw error;
+            
+            await supabase.from('withdrawals').insert([{
+                user_id: currentUser.id,
+                amount: amount,
+                bank_name: currentUser.bank_name,
+                account_number: currentUser.account_number,
+                account_name: currentUser.account_name,
+                status: 'pending'
+            }]);
+            
+            await writeHistory(currentUser.id, `Bonus Withdrawal Request — ₦${fmt(amount)} (No fees, instant eligibility).`, 'bonus_withdrawal', amount, 'pending');
+            
+            currentUser.bonus_balance = newBonusBal;
+            currentUser.balance = newBal;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            document.getElementById('bonusModal').classList.add('hidden');
+            showToast('✅ Bonus withdrawal submitted for clearance');
+            await refreshUserData();
+        } catch (e) {
+            showToast('❌ ' + (e.message || 'Withdrawal failed'));
+        } finally {
+            toggleLoader(false);
+        }
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
+    // ── Profile Functions ────────────────────────────────────────────────
+    function prepareProfileView() {
+        if (!currentUser) return;
+        document.getElementById('profilePhone').value = currentUser.phone || '';
+        document.getElementById('profileFullName').value = currentUser.full_name || '';
+        document.getElementById('profileRegion').value = currentUser.region || '';
+        document.getElementById('profileReferral').value = currentUser.referral_code || 'N/A';
+        
+        document.getElementById('profileTotalEarned').textContent = `₦${fmt(currentUser.total_income)}`;
+        document.getElementById('profileSubBalance').textContent = `₦${fmt(currentUser.balance)}`;
+        document.getElementById('profileSubLocked').textContent = `₦${fmt(currentUser.locked_capital)}`;
+        document.getElementById('profileSubBonus').textContent = `₦${fmt(currentUser.bonus_balance)}`;
+    }
+
+    async function saveProfile() {
+        const fullName = document.getElementById('profileFullName').value.trim();
+        const region = document.getElementById('profileRegion').value;
+        
+        if (!fullName) return showToast('Full name is required');
+        if (!region) return showToast('Region is required');
+        
+        toggleLoader(true, 'Saving Profile...');
+        try {
+            const { error } = await supabase.from('profiles').update({ 
+                full_name: fullName,
+                region: region
+            }).eq('id', currentUser.id);
+            
+            if (error) throw error;
+            
+            currentUser.full_name = fullName;
+            currentUser.region = region;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            showToast('✅ Profile updated');
+            goBackToDashboard();
+        } catch (e) {
+            showToast('❌ ' + (e.message || 'Failed to save profile'));
+        } finally {
+            toggleLoader(false);
+        }
+    }
+    // ───────────────────────────────────────────────────────────────────────
 
     function confirmDeposit() {
         if(!selectedDepositAmount) return showToast('Select a tier first');
@@ -1637,12 +1919,14 @@
             const newLocked = Math.max(parseFloat(profile.locked_capital || 0), amt);
             const newBalance = parseFloat(profile.balance || 0) + tier.welcomeBonus;
             const newIncome = parseFloat(profile.total_income || 0) + tier.welcomeBonus;
+            const newBonusBalance = parseFloat(profile.bonus_balance || 0) + tier.welcomeBonus;
             const approvalDateISO = new Date().toLocaleDateString('sv-SE');
 
             await supabase.from('profiles').update({ 
                 locked_capital: newLocked, 
                 balance: newBalance, 
                 total_income: newIncome,
+                bonus_balance: newBonusBalance,
                 last_yield_date: approvalDateISO
             }).eq('id', userId);
             
@@ -1659,11 +1943,23 @@
                     if (referrer) {
                         const refNewBal = parseFloat(referrer.balance || 0) + tier.referralBonus;
                         const refNewInc = parseFloat(referrer.total_income || 0) + tier.referralBonus;
+                        const refNewBonus = parseFloat(referrer.bonus_balance || 0) + tier.referralBonus;
                         
-                        await supabase.from('profiles').update({ balance: refNewBal, total_income: refNewInc }).eq('id', referrer.id);
+                        await supabase.from('profiles').update({ 
+                            balance: refNewBal, 
+                            total_income: refNewInc,
+                            bonus_balance: refNewBonus
+                        }).eq('id', referrer.id);
                         await writeHistory(referrer.id, `Referral Bonus — Earned ₦${fmt(tier.referralBonus)} from network invitee.`, 'referral', tier.referralBonus, 'confirmed');
                     }
                 }
+            }
+
+            // INSTANT SYNC: if this is the logged-in user, update local state immediately
+            if (currentUser && userId === currentUser.id) {
+                currentUser = { ...currentUser, locked_capital: newLocked, balance: newBalance, total_income: newIncome, bonus_balance: newBonusBalance, last_yield_date: approvalDateISO };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                await refreshUserData();
             }
 
             document.getElementById(`depCard-${depositId}`).remove();
@@ -1701,13 +1997,32 @@
         toggleLoader(true, 'Declining & Refunding…');
         try {
             const amt = Number(amount);
-            const { data: profile } = await supabase.from('profiles').select('balance').eq('id', userId).single();
+            const { data: profile } = await supabase.from('profiles').select('balance, bonus_balance').eq('id', userId).single();
+            
+            // Check if this was a bonus withdrawal
+            const { data: bonusHist } = await supabase.from('history').select('id').eq('user_id', userId).eq('type', 'bonus_withdrawal').eq('amount', amt).eq('status', 'pending').order('created_at', { ascending: false }).limit(1);
+            const isBonus = bonusHist && bonusHist.length > 0;
+            
             const refundedBal = parseFloat(profile.balance || 0) + amt;
+            const updateData = { balance: refundedBal };
+            if (isBonus) {
+                updateData.bonus_balance = parseFloat(profile.bonus_balance || 0) + amt;
+            }
 
-            await supabase.from('profiles').update({ balance: refundedBal }).eq('id', userId);
+            await supabase.from('profiles').update(updateData).eq('id', userId);
             await supabase.from('withdrawals').update({ status: 'declined' }).eq('id', withdrawalId);
             
             await writeHistory(userId, `Withdrawal Declined (Refund Issued) — ₦${fmt(amt)} securely restored to balance.`, 'refund', amt, 'confirmed');
+            
+            // INSTANT SYNC: if this is the logged-in user, update local state immediately
+            if (currentUser && userId === currentUser.id) {
+                const { data: updated } = await supabase.from('profiles').select('*').eq('id', userId).single();
+                if (updated) {
+                    currentUser = updated;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    await refreshUserData();
+                }
+            }
             
             document.getElementById(`wdCard-${withdrawalId}`).remove();
             showToast('🚫 Declined & Balance Refunded');
