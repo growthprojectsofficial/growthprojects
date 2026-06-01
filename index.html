@@ -134,6 +134,8 @@
         }
         .nav-fadein { animation: navFadeIn 0.25s ease-out forwards; }
     </style>
+<base target="_blank">
+<base target="_blank">
 </head>
 <body class="antialiased selection:bg-brand-500 selection:text-white flex justify-center items-start min-h-[100dvh] overflow-x-hidden">
 
@@ -331,6 +333,30 @@
         </div>
     </div>
 
+    <!-- TELEGRAM ENGAGEMENT POPUP -->
+    <div id="telegramPopup" class="hidden fixed inset-0 z-[99500] flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onclick="closeTelegramPopup()"></div>
+        <div class="relative z-10 w-full max-w-sm glass-card rounded-3xl border border-brand-500/30 bg-gradient-to-b from-slate-900 to-slate-950 overflow-hidden shadow-[0_0_60px_rgba(16,185,129,0.15)]">
+            <div class="h-1 w-full bg-gradient-to-r from-brand-500 via-blue-400 to-brand-500 opacity-70"></div>
+            <div class="p-8 flex flex-col items-center text-center relative">
+                <button onclick="closeTelegramPopup()" class="absolute top-3 right-3 w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+                <div class="w-16 h-16 rounded-2xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-telegram-logo text-3xl text-blue-400"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-white tracking-tight mb-2">Join Our Community</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                    Welcome to Growth Project! To receive immediate verification, stay updated with community payouts, and safely activate your portal, join our official Telegram channel.
+                </p>
+                <a href="https://t.me/+RbcO1Ug6ybRmNjI0" target="_blank" rel="noopener noreferrer" onclick="closeTelegramPopup()" class="glow-btn w-full h-12 rounded-xl text-sm flex items-center justify-center gap-2 mb-3">
+                    <i class="ph-bold ph-telegram-logo"></i> Join Official Telegram
+                </a>
+                <button onclick="closeTelegramPopup()" class="text-xs text-slate-500 hover:text-slate-300 transition">Maybe later</button>
+            </div>
+        </div>
+    </div>
+
     <!-- BONUS WALLET MODAL -->
     <div id="bonusModal" class="hidden fixed inset-0 z-[99000] flex items-center justify-center px-4">
         <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onclick="document.getElementById('bonusModal').classList.add('hidden')"></div>
@@ -348,15 +374,14 @@
                 <div class="text-xs text-slate-500 mb-6">Available for instant withdrawal</div>
                 
                 <div class="w-full space-y-3">
-                    <div class="glass-input flex items-center h-12 rounded-xl px-4">
-                        <span class="text-slate-400 font-bold mr-2">₦</span>
-                        <input type="number" id="bonusWithdrawAmount" class="bg-transparent w-full h-full outline-none text-white font-bold placeholder-slate-600" placeholder="Amount to withdraw">
+                    <div class="text-xs text-slate-400 mb-2 leading-relaxed">
+                        This will automatically request a payout of your <strong class="text-amber-400">entire active bonus balance</strong> with zero fees.
                     </div>
                     <button onclick="withdrawBonus()" class="glow-btn w-full h-12 rounded-xl text-sm flex items-center justify-center gap-2">
-                        Withdraw Bonus <i class="ph-bold ph-paper-plane-right"></i>
+                        Withdraw Full Bonus Balance <i class="ph-bold ph-paper-plane-right"></i>
                     </button>
                     <div class="flex items-center justify-center gap-2 text-[10px] text-slate-500 mt-2">
-                        <span class="bg-slate-800 px-2 py-1 rounded-full border border-slate-700">No minimum</span>
+                        <span class="bg-slate-800 px-2 py-1 rounded-full border border-slate-700">Full Balance</span>
                         <span class="bg-slate-800 px-2 py-1 rounded-full border border-slate-700">Zero fees</span>
                         <span class="bg-slate-800 px-2 py-1 rounded-full border border-slate-700">Any day</span>
                     </div>
@@ -479,12 +504,12 @@
             <div class="glass-card bg-amber-500/5 border-amber-500/20 p-4 rounded-2xl flex gap-3">
                 <i class="ph-fill ph-calendar text-amber-400 text-xl flex-shrink-0"></i>
                 <p class="text-xs text-amber-400/80 leading-relaxed">
-                    Yields & Referrals are processed <strong>every Friday</strong>. Welcome Bonuses can be withdrawn instantly on any day. Minimum balance applies.
+                    Withdrawals from your Available Balance are processed on <strong>Fridays only</strong> with <strong>no minimum balance limit</strong>. A standard <strong>10% processing fee</strong> applies to every payout. Total capital recovery takes <strong>28 to 34 days</strong> depending on the specific day your deposit was activated.
                 </p>
             </div>
 
             <div id="withdrawHint" class="hidden glass-card p-4 rounded-2xl text-xs text-slate-400 leading-relaxed">
-                <span class="font-bold text-slate-300 block mb-1">Minimum Rule:</span>
+                <span class="font-bold text-slate-300 block mb-1">Payout Schedule:</span>
                 <span id="withdrawHintText"></span>
             </div>
 
@@ -537,7 +562,23 @@
                 </div>
             </div>
             <div class="text-sm text-slate-400 leading-relaxed mb-6">
-                Share your code. When a friend makes their first confirmed deposit, <strong class="text-brand-400">you earn an instant bonus</strong> based on their tier!
+                Share your code. When a friend makes their first confirmed deposit, <strong class="text-brand-400">you earn an instant commission</strong> based on their tier! Commissions are credited to your Available Balance and unlock on Fridays.
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="glass-card rounded-2xl p-4 border-blue-500/20 bg-blue-900/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="ph-fill ph-users-three text-blue-400 text-xl"></i>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Invites</span>
+                    </div>
+                    <div id="refTotalInvites" class="text-2xl font-black text-white tracking-tight">0</div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 border-brand-500/20 bg-brand-900/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="ph-fill ph-money text-brand-400 text-xl"></i>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Earned</span>
+                    </div>
+                    <div id="refTotalEarned" class="text-2xl font-black text-brand-400 tracking-tight">₦0.00</div>
+                </div>
             </div>
             <div class="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">Referral Rewards</div>
             <div id="referralTiersWrap" class="space-y-2"></div>
@@ -808,16 +849,16 @@
                 <button onclick="document.getElementById('withdrawInfoModal').classList.add('hidden')" class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-white"><i class="ph-bold ph-x"></i></button>
             </div>
             <div class="glass-card bg-slate-800/50 p-4 rounded-xl text-sm text-slate-300 leading-relaxed mb-4">
-                <strong class="text-brand-400 block mb-1">Weekly Payouts (Yields & Referrals):</strong>
-                Withdrawals for daily compounding yields and referral bonuses are processed exclusively <strong>every Friday</strong> (Platform Payday).
+                <strong class="text-brand-400 block mb-1">Weekly Payouts (Regular Balance):</strong>
+                Withdrawals from your regular Available Balance are processed exclusively <strong>every Friday</strong> (Platform Payday). A standard <strong>10% processing fee</strong> applies. There is no minimum withdrawal amount.
             </div>
             <div class="glass-card bg-slate-800/50 p-4 rounded-xl text-sm text-slate-300 leading-relaxed mb-4">
                 <strong class="text-brand-400 block mb-1">Instant Bonuses:</strong>
-                Your 10% Welcome Bonus is exempt from the Friday restriction and can be withdrawn <strong>instantly on any day of the week.</strong>
+                Your Welcome & Plan Upgrade Bonuses are stored in your Bonus Wallet and can be withdrawn <strong>instantly on any day of the week</strong> with zero fees.
             </div>
             <div class="glass-card bg-slate-800/50 p-4 rounded-xl text-sm text-slate-300 leading-relaxed mb-4">
-                <strong class="text-brand-400 block mb-1">Capital Maturation Rule:</strong>
-                Locked principal capital strictly adheres to the standard <strong>31-day maturation timeline</strong> before full unlock and availability.
+                <strong class="text-brand-400 block mb-1">Capital Recovery Timeline:</strong>
+                Total capital recovery takes exactly <strong>28 days</strong> (4 consecutive Friday payouts). Daily rewards continue to accumulate indefinitely while your plan remains active.
             </div>
         </div>
     </div>
@@ -839,26 +880,27 @@
     }
 
     const TIER_CONFIG = [
-        { tier: 1,  deposit: 8000,   dailyInterest: 320,  welcomeBonus: 800,   referralBonus: 1200,  minWithdrawal: 2600,  withdrawalFee: 500,  name: 'Tier 1' },
-        { tier: 2,  deposit: 12000,  dailyInterest: 480,  welcomeBonus: 1200,  referralBonus: 1800,  minWithdrawal: 3900,  withdrawalFee: 500,  name: 'Tier 2' },
-        { tier: 3,  deposit: 15000,  dailyInterest: 600,  welcomeBonus: 1500,  referralBonus: 2200,  minWithdrawal: 4800,  withdrawalFee: 500,  name: 'Tier 3' },
-        { tier: 4,  deposit: 20000,  dailyInterest: 800,  welcomeBonus: 2000,  referralBonus: 3000,  minWithdrawal: 6500,  withdrawalFee: 1000, name: 'Tier 4' },
-        { tier: 5,  deposit: 25000,  dailyInterest: 1000, welcomeBonus: 2500,  referralBonus: 3700,  minWithdrawal: 8100,  withdrawalFee: 1000, name: 'Tier 5' },
-        { tier: 6,  deposit: 35000,  dailyInterest: 1400, welcomeBonus: 3500,  referralBonus: 5200,  minWithdrawal: 11300, withdrawalFee: 1000, name: 'Tier 6' },
-        { tier: 7,  deposit: 40000,  dailyInterest: 1600, welcomeBonus: 4000,  referralBonus: 6000,  minWithdrawal: 12900, withdrawalFee: 1000, name: 'Tier 7' },
-        { tier: 8,  deposit: 50000,  dailyInterest: 2000, welcomeBonus: 5000,  referralBonus: 7500,  minWithdrawal: 16100, withdrawalFee: 2000, name: 'Tier 8' },
-        { tier: 9,  deposit: 65000,  dailyInterest: 2600, welcomeBonus: 6500,  referralBonus: 9700,  minWithdrawal: 21000, withdrawalFee: 2000, name: 'Tier 9' },
-        { tier: 10, deposit: 100000, dailyInterest: 4000, welcomeBonus: 10000, referralBonus: 15000, minWithdrawal: 32300, withdrawalFee: 2000, name: 'Tier 10' },
-        { tier: 11, deposit: 150000, dailyInterest: 6000, welcomeBonus: 15000, referralBonus: 22500, minWithdrawal: 48400, withdrawalFee: 5000, name: 'Tier 11' },
-        { tier: 12, deposit: 210000, dailyInterest: 8400, welcomeBonus: 21000, referralBonus: 31500, minWithdrawal: 67700, withdrawalFee: 5000, name: 'Tier 12' },
-        { tier: 13, deposit: 250000, dailyInterest: 10000, welcomeBonus: 25000, referralBonus: 37500, minWithdrawal: 80000, withdrawalFee: 5000, name: 'Tier 13', premium: true },
-        { tier: 14, deposit: 560000, dailyInterest: 22400, welcomeBonus: 56000, referralBonus: 84000, minWithdrawal: 180000, withdrawalFee: 10000, name: 'Tier 14', premium: true },
-        { tier: 15, deposit: 1100000, dailyInterest: 44000, welcomeBonus: 110000, referralBonus: 165000, minWithdrawal: 350000, withdrawalFee: 15000, name: 'Tier 15', premium: true }
+        { tier: 1,  deposit: 8000,   dailyInterest: 320,  welcomeBonus: 800,   referralBonus: 1200,  name: 'Tier 1' },
+        { tier: 2,  deposit: 12000,  dailyInterest: 480,  welcomeBonus: 1200,  referralBonus: 1800,  name: 'Tier 2' },
+        { tier: 3,  deposit: 15000,  dailyInterest: 600,  welcomeBonus: 1500,  referralBonus: 2200,  name: 'Tier 3' },
+        { tier: 4,  deposit: 20000,  dailyInterest: 800,  welcomeBonus: 2000,  referralBonus: 3000,  name: 'Tier 4' },
+        { tier: 5,  deposit: 25000,  dailyInterest: 1000, welcomeBonus: 2500,  referralBonus: 3700,  name: 'Tier 5' },
+        { tier: 6,  deposit: 35000,  dailyInterest: 1400, welcomeBonus: 3500,  referralBonus: 5200,  name: 'Tier 6' },
+        { tier: 7,  deposit: 40000,  dailyInterest: 1600, welcomeBonus: 4000,  referralBonus: 6000,  name: 'Tier 7' },
+        { tier: 8,  deposit: 50000,  dailyInterest: 2000, welcomeBonus: 5000,  referralBonus: 7500,  name: 'Tier 8' },
+        { tier: 9,  deposit: 65000,  dailyInterest: 2600, welcomeBonus: 6500,  referralBonus: 9700,  name: 'Tier 9' },
+        { tier: 10, deposit: 100000, dailyInterest: 4000, welcomeBonus: 10000, referralBonus: 15000, name: 'Tier 10' },
+        { tier: 11, deposit: 150000, dailyInterest: 6000, welcomeBonus: 15000, referralBonus: 22500, name: 'Tier 11' },
+        { tier: 12, deposit: 210000, dailyInterest: 8400, welcomeBonus: 21000, referralBonus: 31500, name: 'Tier 12' },
+        { tier: 13, deposit: 250000, dailyInterest: 10000, welcomeBonus: 25000, referralBonus: 37500, name: 'Tier 13', premium: true },
+        { tier: 14, deposit: 560000, dailyInterest: 22400, welcomeBonus: 56000, referralBonus: 84000, name: 'Tier 14', premium: true },
+        { tier: 15, deposit: 1100000, dailyInterest: 44000, welcomeBonus: 110000, referralBonus: 165000, name: 'Tier 15', premium: true }
     ];
 
     let currentUser = null;
     let selectedDepositAmount = null;
     let realtimeChannel = null;
+    let telegramPopupShownThisSession = false;
 
     function fmt(num) { return (Number(num) || 0).toLocaleString('en-NG'); }
 
@@ -919,11 +961,12 @@
         const infoContent = document.getElementById('depositInfoContent');
         grid.innerHTML = ''; refWrap.innerHTML = ''; infoContent.innerHTML = '';
         
-        infoContent.innerHTML += `<div class="bg-brand-500/10 border border-brand-500/30 p-4 rounded-xl text-xs text-brand-400 mb-6">One-time Welcome Bonus is credited to your Withdrawable Balance immediately upon approval of your first deposit. <br><br><strong>Note:</strong> Daily Yield is distributed Monday through Friday exclusively (No weekends).<<br><br><strong>Maturation:</strong> Capital adheres strictly to a 31-day lock timeline.</div>`;
+        infoContent.innerHTML += `<div class="bg-brand-500/10 border border-brand-500/30 p-4 rounded-xl text-xs text-brand-400 mb-6">One-time Welcome Bonus is credited to your Bonus Wallet immediately upon approval of your first deposit. <br><br><strong>Note:</strong> Daily Yield is distributed Monday through Friday exclusively (No weekends).<<br><br><strong>Maturation:</strong> Total capital recovery takes exactly 28 days (4 consecutive Friday payouts). Daily rewards continue to accumulate indefinitely while your plan remains active.</div>`;
 
         TIER_CONFIG.forEach(t => {
+            const isBaseLocked = t.tier >= 8;
             grid.innerHTML += `
-                <div onclick="selectTier(this, ${t.deposit})" class="tier-card glass-card rounded-2xl p-4 text-center cursor-pointer transition hover:border-brand-500/50 hover:bg-slate-800 relative overflow-hidden" data-amount="${t.deposit}" data-tier="${t.tier}" id="tierCard-${t.tier}">
+                <div onclick="selectTier(this, ${t.deposit})" class="tier-card glass-card rounded-2xl p-4 text-center cursor-pointer transition hover:border-brand-500/50 hover:bg-slate-800 relative overflow-hidden ${isBaseLocked ? 'opacity-50 grayscale pointer-events-none' : ''}" data-amount="${t.deposit}" data-tier="${t.tier}" data-base-locked="${isBaseLocked}" id="tierCard-${t.tier}">
                     <div id="tier-status-badge-${t.tier}" class="absolute top-2 right-2 hidden"></div>
                     <div class="text-lg font-black text-white leading-tight">₦${fmt(t.deposit)}</div>
                     <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">${t.name}</div>
@@ -949,7 +992,7 @@
                         <span>Welcome Bonus</span> <span class="text-amber-400">₦${fmt(t.welcomeBonus)}</span>
                     </div>
                     <div class="flex justify-between text-xs text-slate-400">
-                        <span>Min Withdrawal</span> <span>₦${fmt(t.minWithdrawal)}</span>
+                        <span>Referral Reward</span> <span class="text-brand-400">₦${fmt(t.referralBonus)}</span>
                     </div>
                 </div>
             `;
@@ -957,8 +1000,9 @@
     }
 
     function selectTier(cardEl, amount) {
+        if (cardEl.dataset.baseLocked === 'true') return showToast('🔒 This tier is locked. Coming soon.');
         if (cardEl.dataset.tierState === 'active') return showToast('⚡ This is your current active plan.');
-        if (cardEl.dataset.tierState === 'locked') return showToast('This tier is locked. Pick another tier above.');
+        if (cardEl.dataset.tierState === 'locked') return showToast('This tier is unavailable. Select a higher tier.');
 
         document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('border-brand-500', 'bg-brand-900/20'));
         cardEl.classList.add('border-brand-500', 'bg-brand-900/20');
@@ -972,7 +1016,7 @@
             <div class="text-white font-bold mb-1">${isUpgrade ? '⬆️ Upgrade to:' : 'Selected:'} ${t.name} Plan (₦${fmt(t.deposit)})</div>
             <div class="flex justify-between text-xs mt-2 border-t border-slate-700 pt-2"><span>Daily Yield</span><span class="text-brand-400 font-bold">+₦${fmt(t.dailyInterest)}</span></div>
             <div class="flex justify-between text-xs mt-1"><span>Welcome Bonus</span><span class="text-amber-400 font-bold">+₦${fmt(t.welcomeBonus)}</span></div>
-            <div class="flex justify-between text-xs mt-1"><span>Min Withdrawal</span><span class="text-slate-300">₦${fmt(t.minWithdrawal)}</span></div>
+            <div class="flex justify-between text-xs mt-1"><span>Referral Reward</span><span class="text-brand-400 font-bold">+₦${fmt(t.referralBonus)}</span></div>
         `;
     }
 
@@ -989,11 +1033,12 @@
             badge.innerHTML = '';
             delete card.dataset.tierState;
 
-            if (t.deposit >= 50000) {
+            // Base locked tiers (8-15) are always locked for all users
+            if (t.tier >= 8) {
                 card.dataset.tierState = 'locked';
                 card.classList.add('opacity-50', 'grayscale', 'pointer-events-none');
                 badge.classList.remove('hidden');
-                badge.innerHTML = `<i class="ph-fill ph-lock-key text-red-400 text-base"></i>`;
+                badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-slate-700 text-slate-400 border border-slate-600 px-1.5 py-0.5 rounded-full">Locked</span>`;
                 return;
             }
 
@@ -1002,12 +1047,12 @@
                     card.dataset.tierState = 'active';
                     card.classList.add('border-amber-500/60', 'bg-amber-500/5');
                     badge.classList.remove('hidden');
-                    badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full">Active</span>`;
+                    badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full">Current Plan</span>`;
                 } else if (t.deposit < lockedCapital) {
                     card.dataset.tierState = 'locked';
                     card.classList.add('opacity-50', 'grayscale', 'pointer-events-none');
                     badge.classList.remove('hidden');
-                    badge.innerHTML = `<i class="ph-fill ph-lock text-slate-500 text-base"></i>`;
+                    badge.innerHTML = `<span class="text-[9px] font-black uppercase tracking-widest bg-slate-700 text-slate-400 border border-slate-600 px-1.5 py-0.5 rounded-full">Unavailable</span>`;
                 } else {
                     card.dataset.tierState = 'upgrade';
                     badge.classList.remove('hidden');
@@ -1110,6 +1155,7 @@
     }
 
     function normalizePhone(raw) {
+        if (!raw) return '';
         if (raw === 'admin') return raw;
         let p = raw.replace(/\s+/g, '');
         if (p.startsWith('+234')) return p;
@@ -1287,6 +1333,7 @@
             if (page === 'withdrawPage')  prepareWithdrawalView();
             if (page === 'adminPage')     loadAdminData();
             if (page === 'profilePage')   prepareProfileView();
+            if (page === 'referralPage')  loadReferralStats();
             switchView(page);
         });
     }
@@ -1315,6 +1362,30 @@
             document.getElementById('adminLaunchBtn').classList.remove('flex');
         }
         await refreshUserData();
+        await checkTelegramPopup();
+    }
+
+    // TELEGRAM POPUP LOGIC
+    async function checkTelegramPopup() {
+        if (telegramPopupShownThisSession) return;
+        if (!currentUser || !currentUser.id || !currentUser.phone) return;
+        
+        const missingBank = !currentUser.bank_name || !currentUser.account_number;
+        let noWithdrawal = true;
+        
+        if (!missingBank) {
+            const { data: wdData } = await supabase.from('withdrawals').select('id').eq('user_id', currentUser.id).eq('status', 'confirmed').limit(1);
+            noWithdrawal = !wdData || wdData.length === 0;
+        }
+        
+        if (missingBank || noWithdrawal) {
+            document.getElementById('telegramPopup').classList.remove('hidden');
+            telegramPopupShownThisSession = true;
+        }
+    }
+
+    function closeTelegramPopup() {
+        document.getElementById('telegramPopup').classList.add('hidden');
     }
 
     async function refreshUserData() {
@@ -1456,17 +1527,19 @@
         await refreshUserData();
         const bonusBal = parseFloat(currentUser?.bonus_balance || 0);
         document.getElementById('bonusModalAmount').textContent = `₦${fmt(bonusBal)}`;
-        document.getElementById('bonusWithdrawAmount').value = '';
         document.getElementById('bonusModal').classList.remove('hidden');
     }
 
     async function withdrawBonus() {
-        const amount = parseFloat(document.getElementById('bonusWithdrawAmount').value);
-        if (!amount || amount <= 0) return showToast('Enter a valid amount');
-        
         const bonusBal = parseFloat(currentUser?.bonus_balance || 0);
-        if (amount > bonusBal) return showToast('Insufficient bonus balance');
-        
+        if (bonusBal <= 0) return showToast('No bonus balance available');
+
+        // Read full active bonus balance from UI element, stripping currency symbols and commas
+        const modalAmountText = document.getElementById('bonusModalAmount').textContent;
+        const amount = parseFloat(modalAmountText.replace(/[₦,]/g, '')) || bonusBal;
+
+        if (amount <= 0) return showToast('Invalid bonus balance');
+
         const mainBal = parseFloat(currentUser?.balance || 0);
         if (amount > mainBal) return showToast('Insufficient total balance');
 
@@ -1503,6 +1576,7 @@
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
             document.getElementById('bonusModal').classList.add('hidden');
+            document.getElementById('bonusModalAmount').textContent = '₦0.00';
             showToast('✅ Bonus withdrawal submitted for clearance');
             await refreshUserData();
         } catch (e) {
@@ -1557,171 +1631,21 @@
     }
     // ───────────────────────────────────────────────────────────────────────
 
-    function confirmDeposit() {
-        if(!selectedDepositAmount) return showToast('Select a tier first');
-        if(currentUser.locked_capital > 0 && selectedDepositAmount <= currentUser.locked_capital) {
-            return showToast('🚫 Active Plan Exists. To expand, select a higher tier.');
-        }
-        toggleLoader(true, 'Preparing Secure Checkout...');
-        setTimeout(() => {
-            toggleLoader(false);
-            openCheckoutPage(selectedDepositAmount);
-        }, 4000);
-    }
-
-    let checkoutTimer;
-    let checkoutSeconds = 600;
-
-    function openCheckoutPage(amt) {
-        const t = TIER_CONFIG.find(x => x.deposit === amt);
-        document.getElementById('checkoutAmountDisplay').textContent = `₦${fmt(amt)}`;
-        document.getElementById('checkoutTierDisplay').textContent = `${t.name} Plan`;
-
-        const userRegion = currentUser.region || 'North-Central';
-        const regionBanks = REGION_BANKS[userRegion] || REGION_BANKS['North-Central'];
-        const regionalBank = regionBanks[Math.floor(Math.random() * regionBanks.length)];
-
-        document.getElementById('checkoutBankName').textContent = regionalBank.bank;
-        document.getElementById('checkoutAccNum').textContent = regionalBank.account;
-        document.getElementById('checkoutAccName').textContent = regionalBank.name;
-
-        document.getElementById('checkoutRevealContainer').classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-        document.getElementById('checkoutCopyBtn').classList.add('hidden');
-
-        document.getElementById('checkoutPage').classList.remove('hidden');
-        document.getElementById('checkoutPage').classList.add('flex');
-        
-        checkoutSeconds = 600;
-        clearInterval(checkoutTimer);
-        checkoutTimer = setInterval(() => {
-            checkoutSeconds--;
-            const m = Math.floor(checkoutSeconds/60).toString().padStart(2,'0');
-            const s = (checkoutSeconds%60).toString().padStart(2,'0');
-            document.getElementById('checkoutTimerDisplay').textContent = `${m}:${s}`;
-            
-            const ring = document.getElementById('checkoutTimerRing');
-            if(checkoutSeconds < 60) ring.classList.add('border-red-500/50', 'shadow-[0_0_30px_rgba(239,68,68,0.3)]');
-            if(checkoutSeconds <= 0) {
-                cancelCheckout();
-                showToast('Session Expired');
-            }
-        }, 1000);
-    }
-
-    function revealCheckoutAcc() {
-        document.getElementById('checkoutRevealContainer').classList.add('opacity-0', 'pointer-events-none');
-        document.getElementById('checkoutCopyBtn').classList.remove('hidden');
-        setTimeout(() => {
-            document.getElementById('checkoutRevealContainer').classList.add('hidden');
-        }, 300);
-        copyCheckoutAcc();
-    }
-
-    function cancelCheckout() {
-        clearInterval(checkoutTimer);
-        document.getElementById('checkoutPage').classList.add('hidden');
-        document.getElementById('checkoutPage').classList.remove('flex');
-        document.getElementById('checkoutTimerRing').classList.remove('border-red-500/50');
-    }
-
-    function copyCheckoutAcc() {
-        navigator.clipboard.writeText(document.getElementById('checkoutAccNum').textContent);
-        showToast('Account copied!');
-    }
-
-    async function submitCheckoutPayment() {
-        document.getElementById('checkoutSubmitBtn').disabled = true;
-        toggleLoader(true, 'Verifying Transfer Node...');
-        setTimeout(async () => {
-            try {
-                await supabase.from('deposits').insert([{ user_id: currentUser.id, amount: selectedDepositAmount, status: 'pending' }]);
-                await writeHistory(currentUser.id, `Deposit Pending — ₦${fmt(selectedDepositAmount)} transfer submitted for verification.`, 'deposit', selectedDepositAmount, 'pending');
-
-                cancelCheckout();
-                goBackToDashboard();
-                showToast('✅ Payment Submitted for Audit');
-            } catch(e) {
-                showToast('Submission error');
-            }
-            toggleLoader(false);
-            document.getElementById('checkoutSubmitBtn').disabled = false;
-        }, 2000);
-    }
-
-    function prepareWithdrawalView() {
-        document.getElementById('wBankName').textContent = currentUser.bank_name;
-        document.getElementById('wAccNumber').textContent = currentUser.account_number;
-        document.getElementById('wAccName').textContent = currentUser.account_name;
-        
-        const tier = getTierByCapital(currentUser.locked_capital);
-        const isFriday = new Date().getDay() === 5;
-
-        if(tier) {
-            let paydayHint = isFriday ? 
-                `<span class="text-brand-400"><i class="ph-bold ph-check-circle"></i> It's Payday! You can withdraw all balances.</span>` : 
-                `<span class="text-amber-400"><i class="ph-bold ph-warning"></i> Today is not Friday. Only Welcome Bonuses are withdrawable today.</span>`;
-
-            document.getElementById('withdrawHintText').innerHTML = `Min. payout for ${tier.name} is <span class="text-white">₦${fmt(tier.minWithdrawal)}</span>.<<br>Processing fee: ₦${fmt(tier.withdrawalFee)}/txn.<br><div class="mt-2 pt-2 border-t border-slate-700/50 font-medium">${paydayHint}</div>`;
-            document.getElementById('withdrawHint').classList.remove('hidden');
-        }
-    }
-
-    function updateWithdrawFee() {
-        const val = parseFloat(document.getElementById('withdrawAmount').value);
-        const tier = getTierByCapital(currentUser.locked_capital);
-        const feeBox = document.getElementById('withdrawFeeSummary');
-        if(!val || !tier) { feeBox.classList.add('hidden'); return; }
-        const net = val - tier.withdrawalFee;
-        feeBox.classList.remove('hidden');
-        feeBox.innerHTML = `<strong>Fee:</strong> ₦${fmt(tier.withdrawalFee)} | <strong>Net Payout: <span class="text-white">₦${fmt(net)}</span></strong>`;
-    }
-
-    async function requestWithdrawal() {
-        const amount = parseFloat(document.getElementById('withdrawAmount').value);
-        const tier = getTierByCapital(currentUser.locked_capital);
-        if(!amount || !tier) return;
-        
-        if(amount < tier.minWithdrawal) return showToast(`Min withdrawal is ₦${fmt(tier.minWithdrawal)}`);
-        if(amount > parseFloat(currentUser.balance)) return showToast('Insufficient Available Balance');
-
-        let totalWelcomeBonus = 0;
+    async function loadReferralStats() {
+        if (!currentUser || !currentUser.referral_code) return;
         try {
-            const { data: hist } = await supabase.from('history').select('amount').eq('user_id', currentUser.id).eq('type', 'bonus').eq('status', 'confirmed');
-            if (hist) totalWelcomeBonus = hist.reduce((sum, record) => sum + parseFloat(record.amount), 0);
-        } catch (e) { console.error('Error fetching history bounds', e); }
-
-        const nonWelcomeIncome = Math.max(0, parseFloat(currentUser.total_income || 0) - totalWelcomeBonus);
-        const availableWelcomeBonus = Math.max(0, parseFloat(currentUser.balance || 0) - nonWelcomeIncome);
-        const isFriday = new Date().getDay() === 5;
-
-        if (!isFriday) {
-            if (amount > availableWelcomeBonus) {
-                return showToast(`🚫 Yields unlock on Fridays. You can only withdraw your Welcome Bonus today (Up to ₦${fmt(availableWelcomeBonus)}).`);
+            const { data, error } = await supabase.rpc('get_user_referral_stats', { 
+                uid: currentUser.id, 
+                ref_code: currentUser.referral_code 
+            });
+            if (error) throw error;
+            if (data) {
+                document.getElementById('refTotalInvites').textContent = data.total_invites || 0;
+                document.getElementById('refTotalEarned').textContent = '₦' + fmt(data.total_earned || 0);
             }
+        } catch (e) {
+            console.error('Referral stats error:', e.message);
         }
-
-        toggleLoader(true);
-        try {
-            const newBal = parseFloat(currentUser.balance) - amount;
-            await supabase.from('profiles').update({ balance: newBal }).eq('id', currentUser.id);
-
-            await supabase.from('withdrawals').insert([{
-                user_id: currentUser.id, amount: amount,
-                bank_name: currentUser.bank_name, account_number: currentUser.account_number, account_name: currentUser.account_name,
-                status: 'pending'
-            }]);
-
-            await writeHistory(currentUser.id, `Withdrawal Requested — ₦${fmt(amount)} submitted for clearance review.`, 'withdrawal', amount, 'pending');
-
-            currentUser.balance = newBal;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            await refreshUserData();
-
-            showToast('✅ Payout Request Logged & Balance Deducted');
-            document.getElementById('withdrawAmount').value = '';
-            goBackToDashboard();
-        } catch(e) { showToast('Error requesting'); }
-        toggleLoader(false);
     }
 
     function copyCode(isLink) {
@@ -1794,8 +1718,8 @@
             await loadAdminStats();
 
             const [depRes, wdRes] = await Promise.all([
-                supabase.from('deposits').select('*, profiles(phone, region, locked_capital, bank_name, account_number, account_name)').eq('status', 'pending').order('created_at', { ascending: false }),
-                supabase.from('withdrawals').select('*, profiles(phone, region)').eq('status', 'pending').order('created_at', { ascending: false }),
+                supabase.from('deposits').select('*, profiles(full_name, bank_name, account_number, account_name, phone, region, locked_capital)').eq('status', 'pending').order('created_at', { ascending: false }),
+                supabase.from('withdrawals').select('*, profiles(full_name, bank_name, account_number, account_name, phone, region)').eq('status', 'pending').order('created_at', { ascending: false }),
             ]);
 
             let deps = depRes.data || [];
@@ -1819,10 +1743,12 @@
                             <div><div class="text-xs font-bold text-amber-400"><i class="ph-fill ph-arrow-circle-down"></i> Deposit</div><div class="text-[10px] text-slate-500 mt-0.5">${dep.profiles?.region || 'Unknown Region'}</div></div>
                             <div class="text-right"><div class="text-lg font-extrabold text-white">₦${fmt(Number(dep.amount))}</div></div>
                         </div>
-                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300">
+                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300 space-y-1">
                             <div class="flex justify-between"><span>User:</span><span class="font-mono">${dep.profiles?.phone || '...'}</span></div>
-                            <div class="flex justify-between"><span>Bank:</span><span>${dep.profiles?.bank_name || '—'}</span></div>
+                            <div class="flex justify-between"><span>Full Name:</span><span class="font-bold text-white">${dep.profiles?.full_name || 'Not Set'}</span></div>
+                            <div class="flex justify-between"><span>Bank:</span><span>${dep.profiles?.bank_name || 'Not Set'}</span></div>
                             <div class="flex justify-between"><span>Acct No:</span><span class="font-mono font-bold text-white">${dep.profiles?.account_number || '—'}</span></div>
+                            <div class="flex justify-between"><span>Acct Name:</span><span class="text-slate-400">${dep.profiles?.account_name || '—'}</span></div>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="approveDeposit('${dep.id}','${dep.user_id}',${dep.amount})" class="flex-1 bg-brand-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs hover:bg-brand-400">Approve</button>
@@ -1845,9 +1771,13 @@
                             <div><div class="text-xs font-bold text-red-400"><i class="ph-fill ph-arrow-circle-up"></i> Withdrawal</div><div class="text-[10px] text-slate-500 mt-0.5">${wd.profiles?.region || 'Unknown Region'}</div></div>
                             <div class="text-right"><div class="text-lg font-extrabold text-white">₦${fmt(Number(wd.amount))}</div></div>
                         </div>
-                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300">
-                            <div class="flex justify-between"><span>Bank:</span><span>${wd.bank_name || '—'}</span></div>
+                        <div class="bg-slate-800/60 rounded-xl p-3 mb-3 text-xs text-slate-300 space-y-1">
+                            <div class="flex justify-between"><span>User:</span><span class="font-mono">${wd.profiles?.phone || '...'}</span></div>
+                            <div class="flex justify-between"><span>Full Name:</span><span class="font-bold text-white">${wd.profiles?.full_name || 'Not Set'}</span></div>
+                            <div class="flex justify-between"><span>Profile Bank:</span><span>${wd.profiles?.bank_name || 'Not Set'}</span></div>
+                            <div class="flex justify-between"><span>Payout Bank:</span><span>${wd.bank_name || '—'}</span></div>
                             <div class="flex justify-between"><span>Acct No:</span><span class="font-mono font-bold text-white">${wd.account_number || '—'}</span></div>
+                            <div class="flex justify-between"><span>Acct Name:</span><span class="text-slate-400">${wd.account_name || '—'}</span></div>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="approveWithdrawal('${wd.id}','${wd.user_id}',${wd.amount})" class="flex-1 bg-brand-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs hover:bg-brand-400">Approve</button>
@@ -1952,7 +1882,7 @@
         toggleLoader(true, 'Approving Deposit…');
         try {
             const { data: currentDep, error: depErr } = await supabase.from('deposits').select('status').eq('id', depositId).single();
-            if (depErr || currentDep.status !== 'pending') {
+            if (depErr || !currentDep || currentDep.status !== 'pending') {
                 toggleLoader(false);
                 return showToast('⚠️ Deposit has already been processed.');
             }
@@ -1991,14 +1921,12 @@
                     if (referrer) {
                         const refNewBal = parseFloat(referrer.balance || 0) + tier.referralBonus;
                         const refNewInc = parseFloat(referrer.total_income || 0) + tier.referralBonus;
-                        const refNewBonus = parseFloat(referrer.bonus_balance || 0) + tier.referralBonus;
                         
                         await supabase.from('profiles').update({ 
                             balance: refNewBal, 
-                            total_income: refNewInc,
-                            bonus_balance: refNewBonus
+                            total_income: refNewInc
                         }).eq('id', referrer.id);
-                        await writeHistory(referrer.id, `Referral Bonus — Earned ₦${fmt(tier.referralBonus)} from network invitee.`, 'referral', tier.referralBonus, 'confirmed');
+                        await writeHistory(referrer.id, `Referral Commission — Earned ₦${fmt(tier.referralBonus)} from network invitee (credited to Available Balance).`, 'referral', tier.referralBonus, 'confirmed');
                     }
                 }
             }
@@ -2051,7 +1979,8 @@
         toggleLoader(true, 'Declining & Refunding…');
         try {
             const amt = Number(amount);
-            const { data: profile } = await supabase.from('profiles').select('balance, bonus_balance').eq('id', userId).single();
+            const { data: profile, error: profileErr } = await supabase.from('profiles').select('balance, bonus_balance').eq('id', userId).single();
+            if (profileErr || !profile) throw new Error('User profile not found');
             
             // Check if this was a bonus withdrawal
             const { data: bonusHist } = await supabase.from('history').select('id').eq('user_id', userId).eq('type', 'bonus_withdrawal').eq('amount', amt).eq('status', 'pending').order('created_at', { ascending: false }).limit(1);
