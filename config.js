@@ -16,16 +16,25 @@ const REGION_BANKS = {
         { bank: 'KudaBank', name: 'Samuel Richard', account: '3003630704' }
     ],
     'North-East': [
-        { bank: 'palmpay', name: 'Amos Ayomide Adeyanju', account: '8108643171' }
+        { bank: 'Kuda', name: 'Adeyanju Amos', account: '2087315466' }
     ],
     'South-West': [
         { bank: 'Moniepoint MFB', name: 'Amos Ayomide Adeyanju', account: '5219345011' }
     ],
     'South-South': [
-        { bank: 'Safe Haven', name: 'Adeyanju Amos', account: '0103184148' }
+        { bank: 'Kuda', name: 'Adeyanju Amos', account: '2087315466' }
     ],
     'South-East': [
         { bank: 'PalmPay', name: 'Comfort Ebunoluwa Ajimuda', account: '8918122594' },
         { bank: 'Moniepoint', name: 'Ajimuda Comfort Ebunoluwa', account: '6742226761' }
     ]
 };
+
+// Freeze the object to prevent runtime modification by unauthorized scripts
+Object.freeze(REGION_BANKS);
+for (const region in REGION_BANKS) {
+    if (Object.prototype.hasOwnProperty.call(REGION_BANKS, region)) {
+        Object.freeze(REGION_BANKS[region]);
+        REGION_BANKS[region].forEach(Object.freeze);
+    }
+}
