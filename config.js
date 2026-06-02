@@ -9,20 +9,20 @@
 
 const REGION_BANKS = {
     'North-Central': [
-        { bank: 'Safe Haven', name: 'Samuel Richard', account: '0119418121' }
+        { bank: 'PalmPay', name: 'Comfort Ebunoluwa Ajimuda', account: '8918122594' }
     ],
     'North-West': [
-        { bank: 'Loma', name: 'Samuel Richard', account: '8065246138' },
-        { bank: 'KudaBank', name: 'Samuel Richard', account: '3003630704' }
+        { bank: 'Moniepoint MFB', name: 'Amos Ayomide Adeyanju', account: '5219345011' },
+        { bank: 'Moniepoint MFB', name: 'Amos Ayomide Adeyanju', account: '5219345011' }
     ],
     'North-East': [
-        { bank: 'Kuda', name: 'Adeyanju Amos', account: '2087315466' }
+        { bank: 'PalmPay', name: 'Comfort Ebunoluwa Ajimuda', account: '8918122594' }
     ],
     'South-West': [
         { bank: 'Moniepoint MFB', name: 'Amos Ayomide Adeyanju', account: '5219345011' }
     ],
     'South-South': [
-        { bank: 'Kuda', name: 'Adeyanju Amos', account: '2087315466' }
+        { bank: 'Moniepoint', name: 'Ajimuda Comfort Ebunoluwa', account: '6742226761' }
     ],
     'South-East': [
         { bank: 'PalmPay', name: 'Comfort Ebunoluwa Ajimuda', account: '8918122594' },
