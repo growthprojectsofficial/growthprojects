@@ -16,7 +16,7 @@ const REGION_BANKS = {
         { bank: 'Moniepoint MFB', name: 'Amos Ayomide Adeyanju', account: '5219345011' }
     ],
     'North-East': [
-        { bank: 'PalmPay', name: 'olarenwaju Enoch Olaposi', account: '8082316628' }
+        { bank: 'PalmPay', name: 'olarenwaju oluwayemisi Sarah', account: '8082316628' }
     ],
     'South-West': [
         { bank: 'PalmPay', name: 'olarenwaju Enoch Olaposi', account: '9119534968' }
@@ -25,8 +25,8 @@ const REGION_BANKS = {
         { bank: 'PalmPay', name: 'olarenwaju Enoch Olaposi', account: '9119534968' }
     ],
     'South-East': [
-        { bank: 'PalmPay', name: 'olarenwaju Enoch Olaposi', account: '8082316628' },
-        { bank: 'PalmPay', name: 'olarenwaju Enoch Olaposi', account: '8082316628' }
+        { bank: 'PalmPay', name: 'olarenwaju oluwayemisi Sarah', account: '8082316628' },
+        { bank: 'PalmPay', name: 'olarenwaju oluwayemisi Sarah', account: '8082316628' }
     ]
 };
 
